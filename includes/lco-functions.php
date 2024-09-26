@@ -199,6 +199,9 @@ function wc_ledyer_confirm_ledyer_order( $order_id ) {
 		$payment_id = WC()->session->get( 'lco_wc_order_id' );
 	}
 
+	$ledyer_order = ledyer()->api->get_order_session( $payment_id );
+	$order->set_transaction_id( $ledyer_order['orderId'] );
+
 	if( null === $session_id ) {
 		$session_id = WC()->session->get( 'lco_wc_session_id' );
     }

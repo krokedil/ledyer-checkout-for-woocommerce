@@ -32,7 +32,7 @@ class Confirmation {
 	 */
 	public function confirm_order() {
 		$ledyer_confirm = filter_input( INPUT_GET, 'lco_confirm', FILTER_SANITIZE_URL );
-		$order_key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_STRING );
+		$order_key    = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
 		if ( empty( $ledyer_confirm ) || empty( $order_key ) ) {
 			return;

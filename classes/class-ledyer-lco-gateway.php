@@ -302,7 +302,7 @@ if ( class_exists( 'WC_Payment_Gateway' ) ) {
 
 				$order->update_meta_data( '_wc_ledyer_session_id', $ledyer_order['id'] );
 
-				$order->update_meta_data( '_transaction_id', $ledyer_order['orderId'] );
+				$order->set_transaction_id( $ledyer_order['orderId'] );
 
 				$order->update_meta_data( '_ledyer_company_id', $ledyer_order['customer']['companyId'] );
 
