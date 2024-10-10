@@ -45,8 +45,8 @@ class Merchant_URLs {
 
 		$terms_url = get_permalink( wc_get_page_id( 'terms' ) );
 
-		if( ! empty( ledyer()->get_setting('terms_url') ) ) {
-			$terms_url = ledyer()->get_setting('terms_url');
+		if ( ! empty( ledyer()->get_setting( 'terms_url' ) ) ) {
+			$terms_url = ledyer()->get_setting( 'terms_url' );
 		}
 
 		return apply_filters( 'lco_wc_terms_url', $terms_url );
@@ -62,8 +62,8 @@ class Merchant_URLs {
 	private function get_privacy_url() {
 		$privacy_url = get_privacy_policy_url();
 
-		if( ! empty( ledyer()->get_setting('privacy_url') ) ) {
-			$privacy_url = ledyer()->get_setting('privacy_url');
+		if ( ! empty( ledyer()->get_setting( 'privacy_url' ) ) ) {
+			$privacy_url = ledyer()->get_setting( 'privacy_url' );
 		}
 
 		return apply_filters( 'lco_wc_privacy_url', $privacy_url );
@@ -92,26 +92,39 @@ class Merchant_URLs {
 	 * @return string
 	 */
 	private function get_confirmation_url( $order_id ) {
+
 		if ( empty( $order_id ) ) {
 			$confirmation_url = add_query_arg(
 				array(
-					'lco_confirm'  => 'yes',
+					'lco_confirm' => 'yes',
 				),
 				wc_get_checkout_url()
 			);
 		} else {
-			$order            = wc_get_order( $order_id );
+			$order = wc_get_order( $order_id );
+
 			$confirmation_url = add_query_arg(
 				array(
-					'lco_confirm'  => 'yes',
+					'lco_confirm' => 'yes',
 				),
 				$order->get_checkout_order_received_url()
 			);
+			// If HPP is enabled or is order pay, add needed parameters
+			$settings = get_option( 'woocommerce_lco_settings', array() );
+			if ( is_wc_endpoint_url( 'order-pay' ) || 'redirect' === ( $settings['checkout_flow'] ?? 'embedded' ) ) {
+				$confirmation_url = add_query_arg(
+					array(
+						'lco_confirm' => 'yes',
+						'session_id'  => '{session.id}',
+						'ledyer_id'   => '{order.id}',
+					),
+					$order->get_checkout_order_received_url()
+				);
+			}
 		}
 
 		return apply_filters( 'lco_wc_confirmation_url', $confirmation_url );
 	}
-
 
 	/**
 	 * Get session ID.

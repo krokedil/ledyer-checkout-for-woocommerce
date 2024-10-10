@@ -71,7 +71,18 @@ class Fields {
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
-			'merchant_id'             => array(
+			'checkout_flow'                  => array(
+				'title'       => __( 'Checkout flow', 'ledyer-checkout-for-woocommerce' ),
+				'type'        => 'select',
+				'options'     => array(
+					'embedded' => __( 'Embedded', 'ledyer-checkout-for-woocommerce' ),
+					'redirect' => __( 'Redirect', 'ledyer-checkout-for-woocommerce' ),
+				),
+				'description' => __( '<strong>Embedded:</strong> the checkout is embedded in the WooCommerce checkout page and partially replaces the checkout form. <strong>Redirect:</strong> the customer is redirected to a payment page hosted by Ledyer.', 'ledyer-checkout-for-woocommerce' ),
+				'default'     => 'embedded',
+				'desc_tip'    => true,
+			),
+			'merchant_id'                    => array(
 				'title'             => __( 'Production Ledyer client ID', 'ledyer-checkout-for-woocommerce' ),
 				'type'              => 'text',
 				'description'       => __( 'Generate credentials (client ID and secret) in the Ledyer Merchant Portal under Settings -> API credentials.', 'ledyer-checkout-for-woocommerce' ),

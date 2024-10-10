@@ -83,7 +83,12 @@ class API {
 	 * @return mixed|\WP_Error
 	 */
 	public function acknowledge_order( $order_id ) {
-		return ( new \Ledyer\Requests\Order\Management\Acknowledge_Order( array( 'orderId' => $order_id, 'data' => array() ) ) )->request();
+		return ( new \Ledyer\Requests\Order\Management\Acknowledge_Order(
+			array(
+				'orderId' => $order_id,
+				'data'    => array(),
+			)
+		) )->request();
 	}
 
 	/**

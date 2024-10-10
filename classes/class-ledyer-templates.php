@@ -21,13 +21,18 @@ class Templates {
 
 	public function filters() {
 		// Override template if Ledyer Checkout page.
-		\add_filter( 'wc_get_template', array( $this, 'override_template' ), 999, 2 );
+
+		$settings = get_option( 'woocommerce_lco_settings', array() );
+
+		if ( 'redirect' !== ( $settings['checkout_flow'] ?? 'embedded' ) ) {
+			\add_filter( 'wc_get_template', array( $this, 'override_template' ), 999, 2 );
+		}
 		// Unrequire WooCommerce Billing State field.
 		\add_filter( 'woocommerce_billing_fields', array( $this, 'unrequire_wc_billing_state_field' ) );
 		// Unrequire WooCommerce Shipping State field.
 		\add_filter( 'woocommerce_shipping_fields', array( $this, 'unrequire_wc_shipping_state_field' ) );
 		// Chage admin shipping fields in edit order admin panel
-    \add_filter('woocommerce_admin_shipping_fields', array($this, 'change_admin_shipping_fields'), 10, 1);
+		\add_filter( 'woocommerce_admin_shipping_fields', array( $this, 'change_admin_shipping_fields' ), 10, 1 );
 	}
 
 	public function actions() {
@@ -48,8 +53,9 @@ class Templates {
 	 * @return string
 	 */
 	public function override_template( $template, $template_name ) {
+
 		if ( is_checkout() ) {
-			$confirm = filter_input( INPUT_GET, 'confirm', FILTER_SANITIZE_URL);
+			$confirm = filter_input( INPUT_GET, 'confirm', FILTER_SANITIZE_URL );
 			// Don't display LCO template if we have a cart that doesn't needs payment.
 			if ( apply_filters( 'lco_check_if_needs_payment', true ) && ! is_wc_endpoint_url( 'order-pay' ) ) {
 				if ( ! WC()->cart->needs_payment() ) {
@@ -120,22 +126,22 @@ class Templates {
 
 			// Bail if this is LCO confirmation page, order received page, LCO page (lco-iframe enqueued), user is not logged and registration is disabled or if woocommerce_cart_has_errors has run.
 			if ( is_lco_confirmation()
-				 || is_wc_endpoint_url( 'order-received' )
-				 || ( ! $checkout->is_registration_enabled() && $checkout->is_registration_required() && ! is_user_logged_in() )
-				 || wp_script_is('lco-iframe', 'enqueued')
-				 || did_action( 'woocommerce_cart_has_errors' )
+				|| is_wc_endpoint_url( 'order-received' )
+				|| ( ! $checkout->is_registration_enabled() && $checkout->is_registration_required() && ! is_user_logged_in() )
+				|| wp_script_is( 'lco-iframe', 'enqueued' )
+				|| did_action( 'woocommerce_cart_has_errors' )
 				 || isset( $_GET['change_payment_method'] ) // phpcs:ignore
-				 || ! $enabled ) {
+				|| ! $enabled ) {
 				return;
 			}
 
 			$url = add_query_arg(
-					array(
-							'lco-order' => 'error',
-							'reason'    => base64_encode( __( 'Failed to load Ledyer Checkout template file.', 'ledyer-checkout-for-woocommerce' ) ),
+				array(
+					'lco-order' => 'error',
+					'reason'    => base64_encode( __( 'Failed to load Ledyer Checkout template file.', 'ledyer-checkout-for-woocommerce' ) ),
 						// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
-					),
-					wc_get_cart_url()
+				),
+				wc_get_cart_url()
 			);
 			wp_safe_redirect( $url );
 			exit;
@@ -163,7 +169,7 @@ class Templates {
 				?>
 			</div>
 			<input id="payment_method_lco" type="radio" class="input-radio" name="payment_method" value="lco"
-				   checked="checked"/></div>
+					checked="checked"/></div>
 		<?php
 	}
 
@@ -177,8 +183,8 @@ class Templates {
 	public function unrequire_wc_billing_state_field( $fields ) {
 		// Unrequire if chosen payment method is Ledyer Checkout.
 		if ( null !== WC()->session && method_exists( WC()->session, 'get' ) &&
-			 WC()->session->get( 'chosen_payment_method' ) &&
-			 'lco' === WC()->session->get( 'chosen_payment_method' )
+			WC()->session->get( 'chosen_payment_method' ) &&
+			'lco' === WC()->session->get( 'chosen_payment_method' )
 		) {
 			$fields['billing_state']['required'] = false;
 		}
@@ -196,8 +202,8 @@ class Templates {
 	public function unrequire_wc_shipping_state_field( $fields ) {
 		// Unrequire if chosen payment method is Ledyer Checkout.
 		if ( null !== WC()->session && method_exists( WC()->session, 'get' ) &&
-			 WC()->session->get( 'chosen_payment_method' ) &&
-			 'lco' === WC()->session->get( 'chosen_payment_method' )
+			WC()->session->get( 'chosen_payment_method' ) &&
+			'lco' === WC()->session->get( 'chosen_payment_method' )
 		) {
 			$fields['shipping_state']['required'] = false;
 		}
@@ -206,8 +212,8 @@ class Templates {
 	}
 
 	/**
-     * Change Shipping fields in edit order page
-     *
+	 * Change Shipping fields in edit order page
+	 *
 	 * @param $fields
 	 *
 	 * @return mixed
@@ -221,8 +227,8 @@ class Templates {
 			$order = wc_get_order( $post->ID );
 		}
 
-		if( 'lco' === $order->get_payment_method() ) {
-			//Unset shipping phone
+		if ( 'lco' === $order->get_payment_method() ) {
+			// Unset shipping phone
 			unset( $fields['phone'] );
 		}
 

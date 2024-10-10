@@ -20,38 +20,44 @@ abstract class Request {
 
 	/**
 	 * Request arguments
+	 *
 	 * @var array|mixed
 	 */
 	protected $arguments;
 	/**
 	 * Ledyer settings
+	 *
 	 * @var array
 	 */
 	protected $settings;
 	/**
 	 * Request method
+	 *
 	 * @var string
 	 */
 	protected $method = 'POST';
 	/**
 	 * Request endpoint
+	 *
 	 * @var string
 	 */
 	protected $url = '';
 	/**
 	 * Merchant Bearer token
+	 *
 	 * @var string
 	 */
 	private $access_token;
 	/**
 	 * Request entrypoint
+	 *
 	 * @var string
 	 */
 	protected $request_url;
 	/*
 	 * Requests Class constructor.
 	 */
-	public function __construct( $arguments = [] ) {
+	public function __construct( $arguments = array() ) {
 		$this->arguments    = $arguments;
 		$this->access_token = $this->token();
 		$this->set_request_url();
@@ -59,6 +65,7 @@ abstract class Request {
 
 	/**
 	 * Sets request endpoint
+	 *
 	 * @return mixed
 	 */
 	abstract protected function set_request_url();
@@ -66,6 +73,7 @@ abstract class Request {
 	/**
 	 * Save merchant's bearer token in transient.
 	 * Transient 'ledyer_token' expires in 3600s.
+	 *
 	 * @return mixed|string
 	 */
 	private function token() {
@@ -77,11 +85,10 @@ abstract class Request {
 
 		$client_credentials = ledyer()->credentials->get_credentials_from_session();
 
-
 		$api_auth_base = 'https://auth.live.ledyer.com/';
 
 		if ( $this->is_test() ) {
-			switch (ledyer()->get_setting( 'development_test_environment' )) {
+			switch ( ledyer()->get_setting( 'development_test_environment' ) ) {
 				case 'local':
 					$api_auth_base = 'http://host.docker.internal:9001/';
 					break;
@@ -89,7 +96,7 @@ abstract class Request {
 				case 'local-fe':
 					$api_auth_base = 'https://auth.dev.ledyer.com/';
 					break;
-				default: 
+				default:
 					$api_auth_base = 'https://auth.sandbox.ledyer.com/';
 					break;
 			}
@@ -97,16 +104,19 @@ abstract class Request {
 
 		$client = new \WP_Http();
 
-		$headers = [
+		$headers = array(
 			'Authorization' => 'Basic ' . base64_encode( $client_credentials['merchant_id'] . ':' . $client_credentials['shared_secret'] ),
-		];
+		);
 
-		$response = $client->post( $api_auth_base . 'oauth/token?grant_type=client_credentials', [
-			'headers' => $headers,
-			'timeout' => 60
-		] );
+		$response = $client->post(
+			$api_auth_base . 'oauth/token?grant_type=client_credentials',
+			array(
+				'headers' => $headers,
+				'timeout' => 60,
+			)
+		);
 
-		$body = $this->process_response( $response, [ 'grant_type' => 'client_credentials' ], $api_auth_base . 'oauth/token' );
+		$body = $this->process_response( $response, array( 'grant_type' => 'client_credentials' ), $api_auth_base . 'oauth/token' );
 
 		$is_wp_error = is_object( $body ) && false !== stripos( get_class( $body ), 'WP_Error' );
 
@@ -120,6 +130,7 @@ abstract class Request {
 
 	/**
 	 * Make request.
+	 *
 	 * @return mixed|\WP_Error
 	 */
 	public function request() {
@@ -133,6 +144,7 @@ abstract class Request {
 
 	/**
 	 * Create request url.
+	 *
 	 * @return string
 	 */
 	protected function get_request_url() {
@@ -144,14 +156,15 @@ abstract class Request {
 
 	/**
 	 * Create request args.
+	 *
 	 * @return array
 	 */
 	protected function get_request_args() {
-		$request_args = [
+		$request_args = array(
 			'headers' => $this->get_request_headers(),
 			'method'  => $this->method,
 			'timeout' => apply_filters( 'ledyer_request_timeout', 10 ),
-		];
+		);
 
 		if ( 'POST' === $this->method && $this->arguments['data'] ) {
 			$request_args['body'] = json_encode( $this->arguments['data'] );
@@ -162,17 +175,19 @@ abstract class Request {
 
 	/**
 	 * Create request headers.
+	 *
 	 * @return array
 	 */
 	protected function get_request_headers() {
-		return [
+		return array(
 			'Authorization' => sprintf( 'Bearer %s', $this->token() ),
-			'Content-Type' => 'application/json',
-		];
+			'Content-Type'  => 'application/json',
+		);
 	}
 
 	/**
 	 * Check if test env is enabled.
+	 *
 	 * @return bool
 	 */
 	protected function is_test() {
@@ -182,6 +197,7 @@ abstract class Request {
 	/**
 	 * Process response. Return response body or error.
 	 * Log errors.
+	 *
 	 * @param $response
 	 * @param $request_args
 	 * @param $request_url
