@@ -31,11 +31,11 @@ class Meta_Box {
 	 * @return void
 	 */
 	public function add_meta_boxes( $post_type ) {
-		if ( 'shop_order' === $post_type ) {
+		if ( 'shop_order' === $post_type || 'woocommerce_page_wc-orders' === $post_type ) {
 			$order_id = get_the_ID();
 			$order    = wc_get_order( $order_id );
 			if ( in_array( $order->get_payment_method(), array( 'lco', 'ledyer_payments' ), true ) ) {
-				add_meta_box( 'lco_meta_box', __( 'Ledyer Order Info', 'ledyer-checkout-for-woocommerce' ), array( $this, 'meta_box_content' ), 'shop_order', 'side', 'core' );
+				add_meta_box( 'lco_meta_box', __( 'Ledyer Order Info', 'ledyer-checkout-for-woocommerce' ), array( $this, 'meta_box_content' ), wc_get_page_screen_id( 'shop-order' ), 'side', 'core' );
 			}
 		}
 	}
