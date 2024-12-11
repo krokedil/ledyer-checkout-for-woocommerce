@@ -84,7 +84,7 @@ class Ledyer_Checkout_For_WooCommerce {
 			1,
 		);
 
-		add_action( 'schedule_process_notification', array( $this, 'process_notification' ), 10, 1 );
+		add_action( 'schedule_process_notification', array( $this, 'process_notification' ), 10, 2 );
 	}
 
 	/**
