@@ -214,6 +214,11 @@ function wc_ledyer_confirm_ledyer_order( $order_id ) {
 	$ledyer_order = ledyer()->api->get_order_session( $payment_id );
 	$order->set_transaction_id( $ledyer_order['orderId'] );
 
+	$ledyer_update_order_reference = ledyer()->api->update_order_reference( $payment_id, array( 'reference' => $order->get_order_number() ) );
+	if ( is_wp_error( $ledyer_update_order_reference ) ) {
+		\Ledyer\Logger::log( 'Couldn\'t set merchant reference ' . $order->get_order_number() );
+	}
+
 	if ( null === $session_id ) {
 		$session_id = WC()->session->get( 'lco_wc_session_id' );
 	}
@@ -315,10 +320,6 @@ function wc_ledyer_confirm_ledyer_order( $order_id ) {
 		$response = ledyer()->api->acknowledge_order( $payment_id );
 		if ( is_wp_error( $response ) ) {
 			\Ledyer\Logger::log( 'Couldn\'t acknowledge order ' . $payment_id );
-		}
-		$ledyer_update_order = ledyer()->api->update_order_reference( $payment_id, array( 'reference' => $order->get_order_number() ) );
-		if ( is_wp_error( $ledyer_update_order ) ) {
-			\Ledyer\Logger::log( 'Couldn\'t set merchant reference ' . $order->get_order_number() );
 		}
 	}
 }
