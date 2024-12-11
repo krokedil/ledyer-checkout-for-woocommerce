@@ -144,7 +144,7 @@ class Ledyer_Checkout_For_WooCommerce {
 		}
 
 		if ( 'com.ledyer.order.ready_for_capture' === $ledyer_event_type ) {
-			$order->update_meta_data( '_ready_for_capture', true );
+			$order->update_meta_data( '_ledyer_ready_for_capture', true );
 			$order->save();
 			return;
 		}
