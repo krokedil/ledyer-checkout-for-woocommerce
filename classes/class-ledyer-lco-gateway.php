@@ -20,6 +20,20 @@ if ( class_exists( 'WC_Payment_Gateway' ) ) {
 	 */
 	class LCO_Gateway extends \WC_Payment_Gateway {
 
+		/**
+		 * The option for if logging is enabled.
+		 *
+		 * @var string
+		 */
+		public $logging;
+
+		/**
+		 * The option for if testmode is enabled.
+		 *
+		 * @var string
+		 */
+		public $testmode;
+
 		public function __construct() {
 			$this->id                 = 'lco';
 			$this->method_title       = __( 'Ledyer Checkout', 'ledyer-checkout-for-woocommerce' );
