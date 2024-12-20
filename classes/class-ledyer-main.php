@@ -84,7 +84,7 @@ class Ledyer_Checkout_For_WooCommerce {
 			1,
 		);
 
-		add_action( 'schedule_process_notification', array( $this, 'process_notification' ), 10, 1 );
+		add_action( 'schedule_process_notification', array( $this, 'process_notification' ), 10, 2 );
 	}
 
 	/**
@@ -113,13 +113,13 @@ class Ledyer_Checkout_For_WooCommerce {
 			return $response;
 		}
 
-		$scheduleId = as_schedule_single_action( time() + 120, 'schedule_process_notification', array( $ledyer_order_id ) );
+		$scheduleId = as_schedule_single_action( time() + 120, 'schedule_process_notification', array( $ledyer_order_id, $ledyer_event_type ) );
 		Logger::log( 'Enqueued notification: ' . $ledyer_event_type . ', schedule-id:' . $scheduleId );
 		$response->set_status( 200 );
 		return $response;
 	}
 
-	public function process_notification( $ledyer_order_id ) {
+	public function process_notification( $ledyer_order_id, $ledyer_event_type ) {
 		Logger::log( 'process notification: ' . $ledyer_order_id );
 
 		$orders = wc_get_orders(
@@ -140,6 +140,12 @@ class Ledyer_Checkout_For_WooCommerce {
 
 		if ( ! is_object( $order ) ) {
 			Logger::log( 'Could not find woo order with ledyer id: ' . $ledyer_order_id );
+			return;
+		}
+
+		if ( 'com.ledyer.order.ready_for_capture' === $ledyer_event_type ) {
+			$order->update_meta_data( '_ledyer_ready_for_capture', true );
+			$order->save();
 			return;
 		}
 
