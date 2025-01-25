@@ -542,7 +542,7 @@ jQuery( function ( $ ) {
 									lco_wc.logToFile(
 										'Successfully created order in WooCommerce.'
 									);
-									const url = new URL( data.redirect );
+									const url = new URL( data.redirect, location.origin );
 									sessionStorage.setItem(
 										'ledyerWooRedirectUrl',
 										url
