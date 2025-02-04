@@ -71,6 +71,10 @@ msgstr ""
 msgid "Enable Test Mode"
 msgstr ""
 
+#: classes/class-ledyer-lco-fields.php:61
+msgid "Enable vertical layout"
+msgstr ""
+
 #: classes/class-ledyer-lco-fields.php:62
 msgid "Place the payment gateway in test mode using test API keys."
 msgstr ""

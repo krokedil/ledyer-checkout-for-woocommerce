@@ -218,12 +218,20 @@ class Fields {
 				'title' => __( 'Iframe Settings', 'ledyer-checkout-for-woocommerce' ),
 				'type'  => 'title',
 			),
+			'vertical_layout' => array(
+				'title'       => __( 'Vertical layout', 'ledyer-checkout-for-woocommerce' ),
+				'label'       => __( 'Enable vertical layout', 'ledyer-checkout-for-woocommerce' ),
+				'type'        => 'checkbox',
+				'description' => __( 'Make ledyer checkout appear below shipping', 'ledyer-checkout-for-woocommerce' ),
+				'default'     => 'yes',
+				'desc_tip'    => true,
+			),
 			'iframe_padding'   => array(
 				'title'       => __( 'Iframe padding', 'ledyer-checkout-for-woocommerce' ),
 				'label'       => __( 'Use default padding', 'ledyer-checkout-for-woocommerce' ),
 				'type'        => 'checkbox',
 				'description' => __( 'Ledyer checkout comes with a wrapping padding of 12px by default.', 'ledyer-checkout-for-woocommerce' ),
-				'default'     => 'no',
+				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
 			'color_button'               => array(
@@ -231,6 +239,19 @@ class Fields {
 				'type'        => 'color',
 				'description' => __( 'Enter a color hex value to change the background color for the buy button, depending on the color provided the button text will be set to black or white.', 'ledyer-checkout-for-woocommerce' ),
 				'default'     => '#000000',
+				'desc_tip'    => true,
+			),
+			// Payment settings
+			'payment_settings_title'       => array(
+				'title' => __( 'Payment Settings', 'ledyer-checkout-for-woocommerce' ),
+				'type'  => 'title',
+			),
+			'keep_cards_processing'   => array(
+				'title'       => __( 'Card Payment Status', 'ledyer-checkout-for-woocommerce' ),
+				'label'       => __( 'Keep card payments in processing status (when autocomplete is active)', 'ledyer-checkout-for-woocommerce' ),
+				'type'        => 'checkbox',
+				'description' => __( 'If checked, orders paid with card will stay in processing status instead of being automatically marked as completed.', 'ledyer-checkout-for-woocommerce' ),
+				'default'     => 'no',
 				'desc_tip'    => true,
 			),
 		);

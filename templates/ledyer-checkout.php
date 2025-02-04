@@ -16,12 +16,13 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 }
 
 $settings = get_option( 'woocommerce_lco_settings' );
+$vertical_layout = 'yes' === ledyer()->get_setting( 'vertical_layout' ) ? 'vertical' : 'horizontal';
 ?>
 
 <form name="checkout" class="checkout woocommerce-checkout">
 	<?php do_action( 'lco_wc_before_wrapper' ); ?>
 
-	<div id="lco-wrapper">
+  <div id="lco-wrapper" class="<?php echo esc_attr( $vertical_layout ); ?>">
 		<div id="lco-order-review">
 			<?php
 			do_action( 'lco_wc_before_order_review' );

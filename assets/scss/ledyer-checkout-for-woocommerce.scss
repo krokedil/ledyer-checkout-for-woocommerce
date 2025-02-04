@@ -1,7 +1,24 @@
+form.woocommerce-checkout {
+  container-type: inline-size;
+}
+
 #lco-wrapper {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+	display: grid;
+  grid-template-columns: 1fr;
+}
+
+#lco-wrapper.horizontal {
+  gap: 24px;
+}
+
+@container (min-width: calc(320px * 2 + 24px)) {
+  #lco-wrapper.horizontal {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  #lco-wrapper.horizontal #lco-iframe {
+    order: -1;
+  }
 }
 
 #lco-order-review,
@@ -13,3 +30,4 @@
 	display: flex;
 	justify-content: center;
 }
+

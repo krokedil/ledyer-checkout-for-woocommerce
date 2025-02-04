@@ -480,8 +480,9 @@ if ( class_exists( 'WC_Payment_Gateway' ) ) {
 				}
 
 				$buy_button_color = ledyer()->get_setting( 'color_button' );
-				$no_padding       = 'yes' === ledyer()->get_setting( 'iframe_padding' ) ? 'true' : 'false';
+				$no_padding       = 'yes' === ledyer()->get_setting( 'iframe_padding' ) ? 'false' : 'true';
 				$lco_order_id     = WC()->session->get( 'lco_wc_session_id' );
+        $vertical_layout  = 'yes' === ledyer()->get_setting( 'vertical_layout') ? 'true' : 'false';
 
 				if ( is_order_received_page() ) {
 					$order_key = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
