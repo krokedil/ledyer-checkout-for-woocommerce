@@ -16,11 +16,14 @@ defined( 'ABSPATH' ) || exit();
  * @package Ledyer\Requests\Order\Management
  */
 class Get_Payment_Status extends Request_Order {
-	/*
+	/**
 	 * Request method
+	 *
+	 * @var string
 	 */
+
 	protected $method = 'GET';
-	/*
+	/**
 	 * Set entrypoint
 	 */
 	protected function set_url() {

@@ -24,28 +24,28 @@ class Fields {
 	 */
 	public static function fields() {
 		$settings = array(
-			'enabled'                    => array(
+			'enabled'                        => array(
 				'title'       => __( 'Enable/Disable', 'ledyer-checkout-for-woocommerce' ),
 				'label'       => __( 'Enable Ledyer Checkout', 'ledyer-checkout-for-woocommerce' ),
 				'type'        => 'checkbox',
 				'description' => '',
 				'default'     => 'no',
 			),
-			'title'                      => array(
+			'title'                          => array(
 				'title'       => __( 'Title', 'ledyer-checkout-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'Payment method title.', 'ledyer-checkout-for-woocommerce' ),
 				'default'     => 'Ledyer',
 				'desc_tip'    => true,
 			),
-			'description'                => array(
+			'description'                    => array(
 				'title'       => __( 'Description', 'ledyer-checkout-for-woocommerce' ),
 				'type'        => 'textarea',
 				'description' => __( 'Payment method description.', 'ledyer-checkout-for-woocommerce' ),
 				'default'     => '',
 				'desc_tip'    => true,
 			),
-			'select_another_method_text' => array(
+			'select_another_method_text'     => array(
 				'title'             => __( 'Other payment method button text', 'ledyer-checkout-for-woocommerce' ),
 				'type'              => 'text',
 				'description'       => __( 'Customize the <em>Select another payment method</em> button text that is displayed in checkout if using other payment methods than Ledyer Checkout. Leave blank to use the default (and translatable) text.', 'ledyer-checkout-for-woocommerce' ),
@@ -55,7 +55,7 @@ class Fields {
 					'autocomplete' => 'off',
 				),
 			),
-			'testmode'                   => array(
+			'testmode'                       => array(
 				'title'       => __( 'Test mode', 'ledyer-checkout-for-woocommerce' ),
 				'label'       => __( 'Enable Test Mode', 'ledyer-checkout-for-woocommerce' ),
 				'type'        => 'checkbox',
@@ -63,7 +63,7 @@ class Fields {
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
-			'logging'                    => array(
+			'logging'                        => array(
 				'title'       => __( 'Logging', 'ledyer-checkout-for-woocommerce' ),
 				'label'       => __( 'Log debug messages', 'ledyer-checkout-for-woocommerce' ),
 				'type'        => 'checkbox',
@@ -92,7 +92,7 @@ class Fields {
 					'autocomplete' => 'off',
 				),
 			),
-			'store_id'             => array(
+			'store_id'                       => array(
 				'title'             => __( 'Production Ledyer Store Id', 'ledyer-checkout-for-woocommerce' ),
 				'type'              => 'text',
 				'description'       => __( 'Optional. If you have multiple stores set in Ledyer account. Paste corresponding store ID found in Ledyer Merchant Portal.', 'ledyer-checkout-for-woocommerce' ),
@@ -102,7 +102,7 @@ class Fields {
 					'autocomplete' => 'off',
 				),
 			),
-			'shared_secret'           => array(
+			'shared_secret'                  => array(
 				'title'             => __( 'Production Ledyer client secret', 'ledyer-checkout-for-woocommerce' ),
 				'type'              => 'password',
 				'description'       => __( 'Generate credentials (client ID and secret) in the Ledyer Merchant Portal under Settings -> API credentials.', 'ledyer-checkout-for-woocommerce' ),
@@ -112,7 +112,7 @@ class Fields {
 					'autocomplete' => 'new-password',
 				),
 			),
-			'test_merchant_id'        => array(
+			'test_merchant_id'               => array(
 				'title'             => __( 'Sandbox Ledyer client ID', 'ledyer-checkout-for-woocommerce' ),
 				'type'              => 'text',
 				'description'       => __( 'Generate credentials (client ID and secret) in the Ledyer Merchant Portal under Settings -> API credentials.', 'ledyer-checkout-for-woocommerce' ),
@@ -122,7 +122,7 @@ class Fields {
 					'autocomplete' => 'off',
 				),
 			),
-			'test_store_id'             => array(
+			'test_store_id'                  => array(
 				'title'             => __( 'Sandbox Ledyer Store Id', 'ledyer-checkout-for-woocommerce' ),
 				'type'              => 'text',
 				'description'       => __( 'Optional. If you have multiple stores set in Ledyer account. Paste corresponding store ID found in Ledyer Merchant Portal.', 'ledyer-checkout-for-woocommerce' ),
@@ -132,7 +132,7 @@ class Fields {
 					'autocomplete' => 'off',
 				),
 			),
-			'test_shared_secret'      => array(
+			'test_shared_secret'             => array(
 				'title'             => __( 'Sandbox Ledyer client secret', 'ledyer-checkout-for-woocommerce' ),
 				'type'              => 'password',
 				'description'       => __( 'Generate credentials (client ID and secret) in the Ledyer Merchant Portal under Settings -> API credentials.', 'ledyer-checkout-for-woocommerce' ),
@@ -142,22 +142,22 @@ class Fields {
 					'autocomplete' => 'new-password',
 				),
 			),
-			'notifications_endpoint_section'           => array(
+			'notifications_endpoint_section' => array(
 				'title' => __( 'Ledyer notifications endpoint', 'ledyer-checkout-for-woocommerce' ),
 				'type'  => 'title',
 			),
-			'notifications_endpoint_link'           => array(
-				'title' => __( get_home_url() . '/wp-json/ledyer/v1/notifications/', 'ledyer-checkout-for-woocommerce' ),
-				'type'  => 'title',
+			'notifications_endpoint_link'    => array(
+				'title'       => __( get_home_url() . '/wp-json/ledyer/v1/notifications/', 'ledyer-checkout-for-woocommerce' ),
+				'type'        => 'title',
 				'description' => __( 'Use this url when setting up notifications in the settings panel in Ledyer merchant portal', 'ledyer-checkout-for-woocommerce' ),
 			),
 
 			// Checkout.
-			'checkout_section'           => array(
+			'checkout_section'               => array(
 				'title' => __( 'Checkout settings', 'ledyer-checkout-for-woocommerce' ),
 				'type'  => 'title',
 			),
-			'allow_custom_shipping'   => array(
+			'allow_custom_shipping'          => array(
 				'title'       => __( 'Allow shipping address', 'ledyer-checkout-for-woocommerce' ),
 				'label'       => __( 'Allow customer to enter different shipping address', 'ledyer-checkout-for-woocommerce' ),
 				'type'        => 'checkbox',
@@ -165,7 +165,7 @@ class Fields {
 				'default'     => 'no',
 				'desc_tip'    => true,
 			),
-			'show_shipping_address_contact'   => array(
+			'show_shipping_address_contact'  => array(
 				'title'       => __( 'Show custom contact details', 'ledyer-checkout-for-woocommerce' ),
 				'label'       => __( 'Allow customers to enter different contact details for the order recipient', 'ledyer-checkout-for-woocommerce' ),
 				'type'        => 'checkbox',
@@ -173,7 +173,7 @@ class Fields {
 				'default'     => 'no',
 				'desc_tip'    => true,
 			),
-			'customer_show_name_fields'   => array(
+			'customer_show_name_fields'      => array(
 				'title'       => __( 'Show name fields', 'ledyer-checkout-for-woocommerce' ),
 				'label'       => __( 'Allow customer to enter name', 'ledyer-checkout-for-woocommerce' ),
 				'type'        => 'checkbox',
@@ -181,7 +181,7 @@ class Fields {
 				'default'     => 'no',
 				'desc_tip'    => true,
 			),
-			'security_level'     => array(
+			'security_level'                 => array(
 				'title'       => __( 'Strong Customer Authentication', 'ledyer-checkout-for-woocommerce' ),
 				'type'        => 'select',
 				'options'     => array(
@@ -197,28 +197,28 @@ class Fields {
 				'default'     => '100',
 				'desc_tip'    => false,
 			),
-			'terms_url'   => array(
+			'terms_url'                      => array(
 				'title'       => __( 'Terms & Conditions Url', 'ledyer-checkout-for-woocommerce' ),
 				'label'       => __( 'Paste published terms and conditions page link', 'ledyer-checkout-for-woocommerce' ),
 				'type'        => 'text',
-				'description' => __( 'Paste published terms and conditions page link. If not set woocommerce terms and conditions page will be used: <a href="' . get_admin_url(null, 'admin.php?page=wc-settings&tab=advanced') . '" > Advanced Settings </a>', 'ledyer-checkout-for-woocommerce' ),
+				'description' => __( 'Paste published terms and conditions page link. If not set woocommerce terms and conditions page will be used: <a href="' . get_admin_url( null, 'admin.php?page=wc-settings&tab=advanced' ) . '" > Advanced Settings </a>', 'ledyer-checkout-for-woocommerce' ),
 				'default'     => '',
 				'desc_tip'    => false,
 			),
-			'privacy_url'   => array(
+			'privacy_url'                    => array(
 				'title'       => __( 'Privacy Url', 'ledyer-checkout-for-woocommerce' ),
 				'label'       => __( 'Paste published privacy page link', 'ledyer-checkout-for-woocommerce' ),
 				'type'        => 'text',
-				'description' => __( 'Paste published privacy page link. If not set woocommerce privacy page will be used: <a href="' . get_admin_url(null, 'options-privacy.php') . '" > Privacy Settings </a>', 'ledyer-checkout-for-woocommerce' ),
+				'description' => __( 'Paste published privacy page link. If not set woocommerce privacy page will be used: <a href="' . get_admin_url( null, 'options-privacy.php' ) . '" > Privacy Settings </a>', 'ledyer-checkout-for-woocommerce' ),
 				'default'     => '',
 				'desc_tip'    => false,
 			),
 			// Checkout iframe settings.
-			'iframe_settings_title'       => array(
+			'iframe_settings_title'          => array(
 				'title' => __( 'Iframe Settings', 'ledyer-checkout-for-woocommerce' ),
 				'type'  => 'title',
 			),
-			'vertical_layout' => array(
+			'vertical_layout'                => array(
 				'title'       => __( 'Vertical layout', 'ledyer-checkout-for-woocommerce' ),
 				'label'       => __( 'Enable vertical layout', 'ledyer-checkout-for-woocommerce' ),
 				'type'        => 'checkbox',
@@ -226,7 +226,7 @@ class Fields {
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
-			'iframe_padding'   => array(
+			'iframe_padding'                 => array(
 				'title'       => __( 'Iframe padding', 'ledyer-checkout-for-woocommerce' ),
 				'label'       => __( 'Use default padding', 'ledyer-checkout-for-woocommerce' ),
 				'type'        => 'checkbox',
@@ -234,19 +234,19 @@ class Fields {
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
-			'color_button'               => array(
+			'color_button'                   => array(
 				'title'       => __( 'Checkout button color', 'ledyer-checkout-for-woocommerce' ),
 				'type'        => 'color',
 				'description' => __( 'Enter a color hex value to change the background color for the buy button, depending on the color provided the button text will be set to black or white.', 'ledyer-checkout-for-woocommerce' ),
 				'default'     => '#000000',
 				'desc_tip'    => true,
 			),
-			// Payment settings
-			'payment_settings_title'       => array(
+			// Payment settings.
+			'payment_settings_title'         => array(
 				'title' => __( 'Payment Settings', 'ledyer-checkout-for-woocommerce' ),
 				'type'  => 'title',
 			),
-			'keep_cards_processing'   => array(
+			'keep_cards_processing'          => array(
 				'title'       => __( 'Card Payment Status', 'ledyer-checkout-for-woocommerce' ),
 				'label'       => __( 'Keep card payments in processing status (when autocomplete is active)', 'ledyer-checkout-for-woocommerce' ),
 				'type'        => 'checkbox',
@@ -260,24 +260,24 @@ class Fields {
 
 		if ( $devmode ) {
 			$dev_settings = array(
-				'development_section'           => array(
+				'development_section'          => array(
 					'title' => __( 'Development settings', 'ledyer-checkout-for-woocommerce' ),
 					'type'  => 'title',
 				),
-				'development_test_environment'     => array(
-					'title'       => __( 'Test Environment', 'ledyer-checkout-for-woocommerce' ),
-					'type'        => 'select',
-					'options'     => array(
-						'local' => 'Local (FE+BE)',
-						'local-fe' => 'Local (FE)',
+				'development_test_environment' => array(
+					'title'    => __( 'Test Environment', 'ledyer-checkout-for-woocommerce' ),
+					'type'     => 'select',
+					'options'  => array(
+						'local'       => 'Local (FE+BE)',
+						'local-fe'    => 'Local (FE)',
 						'development' => 'Development',
-						'sandbox' => 'Sandbox',
+						'sandbox'     => 'Sandbox',
 					),
-					'default'     => 'sandbox',
-					'desc_tip'    => false,
+					'default'  => 'sandbox',
+					'desc_tip' => false,
 				),
 			);
-			$settings = array_merge($settings, $dev_settings);
+			$settings     = array_merge( $settings, $dev_settings );
 		}
 
 		return apply_filters( 'lco_wc_gateway_settings', $settings );

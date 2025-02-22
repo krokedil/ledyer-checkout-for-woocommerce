@@ -44,7 +44,7 @@ class Credentials {
 		$credentials = array(
 			'merchant_id'   => self::$settings[ $test_string . 'merchant_id' ],
 			'shared_secret' => htmlspecialchars_decode( self::$settings[ $test_string . 'shared_secret' ] ),
-			'store_id'      => self::$settings[ $test_string . 'store_id' ]
+			'store_id'      => self::$settings[ $test_string . 'store_id' ],
 		);
 
 		return apply_filters( 'lco_wc_credentials_from_session', $credentials, self::$settings['testmode'] );

@@ -1,4 +1,4 @@
-FROM wordpress:6.0.2-php8.1-apache
+FROM wordpress:6.7.1-php8.3-apache
 
 ENV XDEBUG_PORT 8999
 ENV XDEBUG_IDEKEY docker

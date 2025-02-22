@@ -16,13 +16,16 @@ defined( 'ABSPATH' ) || exit();
  * @package Ledyer\Requests\Order\Management
  */
 class Get_Order extends Request_Order {
-	/*
+	/**
 	 * Request method
+	 *
+	 * @var string
 	 */
+
 	protected $method = 'GET';
-	/*
-	 * Set entrypoint
-	 */
+		/**
+		 * Set entrypoint
+		 */
 	protected function set_url() {
 		$this->url = sprintf( 'v1/orders/%s', $this->arguments['orderId'] );
 

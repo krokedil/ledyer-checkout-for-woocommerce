@@ -2,13 +2,16 @@
 
 \defined( 'ABSPATH' ) || die();
 
+/**
+ * Class containing Ledyer payment status constants.
+ */
 abstract class LedyerPaymentStatus {
-	const orderInitiated = "orderInitiated";
-	const orderPending = "orderPending";
-	const paymentPending = "paymentPending";
-	const paymentConfirmed = "paymentConfirmed";
-	const orderCaptured = "orderCaptured";
-	const orderRefunded = "orderRefunded";
-	const orderCancelled = "orderCancelled";
-	const unknown = "unknown";
+	const ORDER_INITIATED   = 'orderInitiated';
+	const ORDER_PENDING     = 'orderPending';
+	const PAYMENT_PENDING   = 'paymentPending';
+	const PAYMENT_CONFIRMED = 'paymentConfirmed';
+	const ORDER_CAPTURED    = 'orderCaptured';
+	const ORDER_REFUNDED    = 'orderRefunded';
+	const ORDER_CANCELLED   = 'orderCancelled';
+	const UNKNOWN           = 'unknown';
 }

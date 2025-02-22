@@ -25,3 +25,11 @@ If you are missing data i woocommerce, make sure you have set the following:
 - Make sure that the Woocommerce shop is configured to target Sweden. Woocommerce -> Settings -> General -> Country/Region -> Sweden
 - Make sure that the Woocommerce shop is configured to use Swedish krona. Woocommerce -> Settings -> General -> Currency -> Swedish krona (kr)
 - Make sure to enter a terms url in Ledyer checkout plugin settings.
+
+## Code formatting
+
+We are following rules specified in phpcs.xml. For automatic formatting on save etc we recommend [phpcbf](https://phpqa.io/projects/phpcbf.html), when in installed you can run
+```shell
+vendor/bin/phpcbf --standard=phpcs.xml .
+```
+To format the whole codebase, or you may wanna find a plugin for you specific development environment.

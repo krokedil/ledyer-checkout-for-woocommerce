@@ -34,7 +34,7 @@ class Logger {
 			if ( empty( self::$log ) ) {
 				self::$log = new \WC_Logger();
 			}
-			$context = [ 'source' => 'ledyer-log' ];
+			$context = array( 'source' => 'ledyer-log' );
 			self::$log->log( 'debug', stripcslashes( wp_json_encode( $message ) ), $context );
 		}
 	}
@@ -60,8 +60,8 @@ class Logger {
 	 * @param string $ledyer_order_id The Ledyer order id.
 	 * @param string $method The method.
 	 * @param string $title The title for the log.
-	 * @param array $request_args The request args.
-	 * @param array $response The response.
+	 * @param array  $request_args The request args.
+	 * @param array  $response The response.
 	 * @param string $code The status code.
 	 *
 	 * @return array
@@ -76,20 +76,20 @@ class Logger {
 			$request_body = json_decode( $request_args['body'], true );
 		}
 
-		return [
+		return array(
 			'id'             => $ledyer_order_id,
 			'type'           => $method,
 			'title'          => $title,
 			'request'        => $request_args,
-			'response'       => [
+			'response'       => array(
 				'body' => $request_body ?? $response,
 				'code' => $code,
-			],
+			),
 			'timestamp'      => gmdate( 'Y-m-d H:i:s' ),
 			// phpcs:ignore WordPress.DateTime.RestrictedFunctions -- Date is not used for display.
 			'stack'          => self::get_stack(),
 			'plugin_version' => Ledyer_Checkout_For_WooCommerce::VERSION,
-		];
+		);
 	}
 
 	/**
@@ -99,11 +99,11 @@ class Logger {
 	 */
 	public static function get_stack() {
 		$debug_data = debug_backtrace(); // phpcs:ignore WordPress.PHP.DevelopmentFunctions -- Data is not used for display.
-		$stack      = [];
+		$stack      = array();
 		foreach ( $debug_data as $data ) {
 			$extra_data = '';
-			if ( ! in_array( $data['function'], [ 'get_stack', 'format_log' ], true ) ) {
-				if ( in_array( $data['function'], [ 'do_action', 'apply_filters' ], true ) ) {
+			if ( ! in_array( $data['function'], array( 'get_stack', 'format_log' ), true ) ) {
+				if ( in_array( $data['function'], array( 'do_action', 'apply_filters' ), true ) ) {
 					if ( isset( $data['object'] ) ) {
 						$priority   = $data['object']->current_priority();
 						$name       = key( $data['object']->current() );
@@ -116,5 +116,4 @@ class Logger {
 
 		return $stack;
 	}
-
 }

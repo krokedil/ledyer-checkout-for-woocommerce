@@ -16,11 +16,13 @@ defined( 'ABSPATH' ) || exit();
  * @package Ledyer\Requests\Order\Management
  */
 class Acknowledge_Order extends Request_Order {
-	/*
-	 * Request method
-	 */
+		/**
+		 * Request method
+		 *
+		 * @var string
+		 */
 	protected $method = 'POST';
-	/*
+	/**
 	 * Set entrypoint
 	 */
 	protected function set_url() {

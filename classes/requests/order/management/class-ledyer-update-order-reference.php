@@ -16,11 +16,14 @@ defined( 'ABSPATH' ) || exit();
  * @package Ledyer\Requests\Order\Management
  */
 class Update_Order_Reference extends Request_Order {
-	/*
+	/**
 	 * Request method
+	 *
+	 * @var string
 	 */
 	protected $method = 'POST';
-	/*
+
+	/**
 	 * Set entrypoint
 	 */
 	protected function set_url() {

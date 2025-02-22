@@ -54,8 +54,10 @@ abstract class Request {
 	 * @var string
 	 */
 	protected $request_url;
-	/*
+	/**
 	 * Requests Class constructor.
+	 *
+	 * @param array $arguments Request arguments.
 	 */
 	public function __construct( $arguments = array() ) {
 		$this->arguments    = $arguments;
@@ -198,9 +200,9 @@ abstract class Request {
 	 * Process response. Return response body or error.
 	 * Log errors.
 	 *
-	 * @param $response
-	 * @param $request_args
-	 * @param $request_url
+	 * @param mixed|\WP_Error $response The response from the request.
+	 * @param array           $request_args The arguments sent with the request.
+	 * @param string          $request_url The URL the request was sent to.
 	 *
 	 * @return mixed|\WP_Error
 	 */

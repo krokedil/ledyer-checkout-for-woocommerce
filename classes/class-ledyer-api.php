@@ -4,6 +4,7 @@
  *
  * @package Ledyer
  */
+
 namespace Ledyer;
 
 \defined( 'ABSPATH' ) || die();
@@ -19,30 +20,31 @@ use Ledyer\Requests\Order\Session\Get_Order;
  * Class that has functions for the ledyer communication.
  */
 class API {
-
 	/**
-	 * @param $order_id
+	 * Gets an order session from Ledyer.
 	 *
-	 * @return mixed|\WP_Error
+	 * @param string $order_id The order ID to get the session for.
+	 * @return mixed|\WP_Error The order session data or WP_Error on failure.
 	 */
 	public function get_order_session( $order_id ) {
 		return ( new Get_Order( array( 'orderId' => $order_id ) ) )->request();
 	}
-
 	/**
-	 * @param $data
+	 * Creates an order session in Ledyer.
 	 *
-	 * @return mixed|\WP_Error
+	 * @param array $data The order session data.
+	 *
+	 * @return mixed|\WP_Error The created order session data or WP_Error on failure.
 	 */
 	public function create_order_session( $data ) {
 		return ( new Create_Order( compact( 'data' ) ) )->request();
 	}
-
 	/**
-	 * @param $order_id
-	 * @param $data
+	 * Updates an order session in Ledyer.
 	 *
-	 * @return mixed|\WP_Error
+	 * @param string $order_id The order ID to update the session for.
+	 * @param array  $data The order session data.
+	 * @return mixed|\WP_Error The updated order session data or WP_Error on failure.
 	 */
 	public function update_order_session( $order_id, $data ) {
 		return ( new Update_Order(
@@ -52,21 +54,21 @@ class API {
 			)
 		) )->request();
 	}
-
 	/**
-	 * @param $order_id
+	 * Gets an order from Ledyer.
 	 *
-	 * @return mixed|\WP_Error
+	 * @param string $order_id The order ID to get.
+	 * @return mixed|\WP_Error The order data or WP_Error on failure.
 	 */
 	public function get_order( $order_id ) {
 		return ( new \Ledyer\Requests\Order\Management\Get_Order( array( 'orderId' => $order_id ) ) )->request();
 	}
-
 	/**
-	 * @param $order_id
-	 * @param $data
+	 * Updates an order reference in Ledyer.
 	 *
-	 * @return mixed|\WP_Error
+	 * @param string $order_id The order ID to update the reference for.
+	 * @param array  $data The order reference data.
+	 * @return mixed|\WP_Error The updated order reference data or WP_Error on failure.
 	 */
 	public function update_order_reference( $order_id, $data ) {
 		return ( new Update_Order_Reference(
@@ -76,11 +78,11 @@ class API {
 			)
 		) )->request();
 	}
-
 	/**
-	 * @param $order_id
+	 * Acknowledges an order in Ledyer.
 	 *
-	 * @return mixed|\WP_Error
+	 * @param string $order_id The order ID to acknowledge.
+	 * @return mixed|\WP_Error The acknowledgement response or WP_Error on failure.
 	 */
 	public function acknowledge_order( $order_id ) {
 		return ( new \Ledyer\Requests\Order\Management\Acknowledge_Order(
@@ -90,9 +92,10 @@ class API {
 			)
 		) )->request();
 	}
-
 	/**
-	 * @param $order_id
+	 * Get payment status for an order.
+	 *
+	 * @param string $order_id The order ID to get payment status for.
 	 *
 	 * @return mixed|\WP_Error
 	 */

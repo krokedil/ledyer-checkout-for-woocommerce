@@ -19,13 +19,12 @@ function lco_create_or_update_order() {
 	WC()->cart->calculate_totals();
 
 	$old_ledyer_settings = WC()->session->get( 'lco_wc_settings' );
-
 	if ( WC()->session->get( 'lco_wc_order_id' )
-		&& $old_ledyer_settings['allow_custom_shipping'] === ledyer()->get_setting( 'allow_custom_shipping' )
-		&& $old_ledyer_settings['show_shipping_address_contact'] === ledyer()->get_setting( 'show_shipping_address_contact' )
-		&& $old_ledyer_settings['customer_show_name_fields'] === ledyer()->get_setting( 'customer_show_name_fields' )
-		&& $old_ledyer_settings['terms_url'] === ledyer()->get_setting( 'terms_url' )
-		&& $old_ledyer_settings['privacy_url'] === ledyer()->get_setting( 'privacy_url' ) ) {
+		&& ledyer()->get_setting( 'allow_custom_shipping' ) === $old_ledyer_settings['allow_custom_shipping']
+		&& ledyer()->get_setting( 'show_shipping_address_contact' ) === $old_ledyer_settings['show_shipping_address_contact']
+		&& ledyer()->get_setting( 'customer_show_name_fields' ) === $old_ledyer_settings['customer_show_name_fields']
+		&& ledyer()->get_setting( 'terms_url' ) === $old_ledyer_settings['terms_url']
+		&& ledyer()->get_setting( 'privacy_url' ) === $old_ledyer_settings['privacy_url'] ) {
 
 		$ledyer_order_id   = WC()->session->get( 'lco_wc_order_id' );
 		$ledyer_session_id = WC()->session->get( 'lco_wc_session_id' );
@@ -259,10 +258,10 @@ function wc_ledyer_confirm_ledyer_order( $order_id ) {
 		$order->save();
 	}
 
-	$ackOrder = false;
+	$ack_order = false;
 
 	switch ( $ledyer_payment_status['status'] ) {
-		case LedyerPaymentStatus::orderPending:
+		case LedyerPaymentStatus::ORDER_PENDING:
 			if ( ! $order->has_status( array( 'on-hold', 'processing', 'completed' ) ) ) {
 				$note = sprintf(
 					__(
@@ -275,7 +274,7 @@ function wc_ledyer_confirm_ledyer_order( $order_id ) {
 				$order->update_status( 'on-hold', $note );
 			}
 			break;
-		case LedyerPaymentStatus::paymentPending:
+		case LedyerPaymentStatus::PAYMENT_PENDING:
 			if ( ! $order->has_status( array( 'on-hold', 'processing', 'completed' ) ) ) {
 				$note = sprintf(
 					__(
@@ -286,10 +285,10 @@ function wc_ledyer_confirm_ledyer_order( $order_id ) {
 					$ledyer_payment_status['note']
 				);
 				$order->update_status( 'on-hold', $note );
-				$ackOrder = true;
+				$ack_order = true;
 			}
 			break;
-		case LedyerPaymentStatus::paymentConfirmed:
+		case LedyerPaymentStatus::PAYMENT_CONFIRMED:
 			if ( ! $order->has_status( array( 'processing', 'completed' ) ) ) {
 				$note = sprintf(
 					__(
@@ -301,12 +300,12 @@ function wc_ledyer_confirm_ledyer_order( $order_id ) {
 				);
 				$order->add_order_note( $note );
 				$order->payment_complete( $payment_id );
-				$ackOrder = true;
+				$ack_order = true;
 			}
 			break;
 	}
 
-	if ( $ackOrder ) {
+	if ( $ack_order ) {
 		$ledyer_order = ledyer()->api->get_order( $payment_id );
 		if ( is_wp_error( $ledyer_order ) ) {
 			\Ledyer\Logger::log( 'Could not get the order from Ledyer with the id ' . $payment_id );
@@ -325,6 +324,11 @@ function wc_ledyer_confirm_ledyer_order( $order_id ) {
 }
 
 
+/**
+ * Redirects to cart with error message if checkout template fails to load.
+ *
+ * @return void
+ */
 function wc_ledyer_cart_redirect() {
 	$url = add_query_arg(
 		array(

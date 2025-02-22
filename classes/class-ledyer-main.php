@@ -9,6 +9,7 @@
 namespace Ledyer;
 
 use Ledyer\Admin\Meta_Box;
+use WP_REST_Response;
 
 \defined( 'ABSPATH' ) || die();
 
@@ -18,6 +19,7 @@ use Ledyer\Admin\Meta_Box;
  * Init class
  */
 class Ledyer_Checkout_For_WooCommerce {
+
 	use Singleton;
 
 	/**
@@ -52,9 +54,12 @@ class Ledyer_Checkout_For_WooCommerce {
 	public $checkout;
 
 	const SLUG     = 'ledyer-checkout-for-woocommerce';
-	const VERSION = '1.11.0';
+	const VERSION  = '1.11.0';
 	const SETTINGS = 'ledyer_checkout_for_woocommerce_settings';
 
+	/**
+	 * Register WordPress actions.
+	 */
 	public function actions() {
 		\add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ) );
 		\add_action( 'admin_init', array( $this, 'on_admin_init' ) );
@@ -90,11 +95,10 @@ class Ledyer_Checkout_For_WooCommerce {
 	/**
 	 * Handles notification callbacks
 	 *
-	 * @param $request
-	 *
+	 * @param \WP_REST_Request $request The incoming request object.
 	 * @return \WP_REST_Response
 	 */
-	public function handle_notification( $request ) {
+	public function handle_notification( \WP_REST_Request $request ) {
 		$request_body = json_decode( $request->get_body() );
 		$response     = new \WP_REST_Response();
 
@@ -107,7 +111,7 @@ class Ledyer_Checkout_For_WooCommerce {
 		$ledyer_event_type = $request_body->{'eventType'};
 		$ledyer_order_id   = $request_body->{'orderId'};
 
-		if ( $ledyer_event_type === null || $ledyer_order_id === null ) {
+		if ( null === $ledyer_event_type || null === $ledyer_order_id ) {
 			Logger::log( 'Request body doesn\'t hold orderId and eventType data.' );
 			$response->set_status( 400 );
 			return $response;
@@ -123,18 +127,18 @@ class Ledyer_Checkout_For_WooCommerce {
 		Logger::log( 'process notification: ' . $ledyer_order_id );
 
 		$orders = wc_get_orders(
-				array(
-					'meta_key' => '_wc_ledyer_order_id',
-					'meta_value' => $ledyer_order_id,
-					'meta_compare' => '=',
-					'date_created' => '>' . (time() - MONTH_IN_SECONDS),
-				),
+			array(
+				'meta_key'     => '_wc_ledyer_order_id',
+				'meta_value'   => $ledyer_order_id,
+				'meta_compare' => '=',
+				'date_created' => '>' . ( time() - MONTH_IN_SECONDS ),
+			),
 		);
 
 		$order_id = isset( $orders[0] ) ? $orders[0]->get_id() : null;
 		$order    = wc_get_order( $order_id );
 
-		Logger::log('Order to process: ' . $order_id);
+		Logger::log( 'Order to process: ' . $order_id );
 
 		if ( ! is_object( $order ) ) {
 			Logger::log( 'Could not find woo order with ledyer id: ' . $ledyer_order_id );
@@ -153,10 +157,10 @@ class Ledyer_Checkout_For_WooCommerce {
 			return;
 		}
 
-		$ackOrder = false;
+		$ack_order = false;
 
 		switch ( $ledyer_payment_status['status'] ) {
-			case \LedyerPaymentStatus::paymentPending:
+			case \LedyerPaymentStatus::PAYMENT_PENDING:
 				if ( ! $order->has_status( array( 'on-hold', 'processing', 'completed' ) ) ) {
 					$note = sprintf(
 						__(
@@ -167,10 +171,10 @@ class Ledyer_Checkout_For_WooCommerce {
 						$ledyer_payment_status['note']
 					);
 					$order->update_status( 'on-hold', $note );
-					$ackOrder = true;
+					$ack_order = true;
 				}
 				break;
-			case \LedyerPaymentStatus::paymentConfirmed:
+			case \LedyerPaymentStatus::PAYMENT_CONFIRMED:
 				if ( ! $order->has_status( array( 'processing', 'completed' ) ) ) {
 					$note = sprintf(
 						__(
@@ -182,35 +186,37 @@ class Ledyer_Checkout_For_WooCommerce {
 					);
 					$order->add_order_note( $note );
 					$order->payment_complete( $ledyer_order_id );
-					$ackOrder = true;
+					$ack_order = true;
 				}
 				break;
-			case \LedyerPaymentStatus::orderCaptured:
+			case \LedyerPaymentStatus::ORDER_CAPTURED:
 				$new_status = 'completed';
 
-				$settings = get_option('woocommerce_lco_settings');
+				$settings = get_option( 'woocommerce_lco_settings' );
 
-				// Check if we should keep card payments in processing status
-				if (isset($settings['keep_cards_processing'])
+				// Check if we should keep card payments in processing status.
+				if (
+					isset( $settings['keep_cards_processing'] )
 					&& 'yes' === $settings['keep_cards_processing']
-					&& isset($ledyer_payment_status['paymentMethod'])
-					&& isset($ledyer_payment_status['paymentMethod']['type'])
-					&& $ledyer_payment_status['paymentMethod']['type'] === 'card') {
+					&& isset( $ledyer_payment_status['paymentMethod'] )
+					&& isset( $ledyer_payment_status['paymentMethod']['type'] )
+					&& 'card' === $ledyer_payment_status['paymentMethod']['type']
+				) {
 					$new_status = 'processing';
 				}
 
-				$new_status = apply_filters('lco_captured_update_status', $new_status, $ledyer_payment_status);
-				$order->update_status($new_status);
+				$new_status = apply_filters( 'lco_captured_update_status', $new_status, $ledyer_payment_status );
+				$order->update_status( $new_status );
 				break;
-			case \LedyerPaymentStatus::orderRefunded:
+			case \LedyerPaymentStatus::ORDER_REFUNDED:
 				$order->update_status( 'refunded' );
 				break;
-			case \LedyerPaymentStatus::orderCancelled:
+			case \LedyerPaymentStatus::ORDER_CANCELLED:
 				$order->update_status( 'cancelled' );
 				break;
 		}
 
-		if ( $ackOrder ) {
+		if ( $ack_order ) {
 			$response = ledyer()->api->acknowledge_order( $ledyer_order_id );
 			if ( is_wp_error( $response ) ) {
 				\Ledyer\Logger::log( 'Couldn\'t acknowledge order ' . $ledyer_order_id );
@@ -322,12 +328,11 @@ class Ledyer_Checkout_For_WooCommerce {
 	/**
 	 * Get LCO setting by name
 	 *
-	 * @param string $key
-	 *
-	 * @return mixed
+	 * @param string $key The setting key to get.
+	 * @return mixed The setting value.
 	 */
 	public function get_setting( $key ) {
-		return self::$settings[ $key ];
+		return self::$settings[ $key ] ?? null;
 	}
 
 	/**
@@ -363,7 +368,7 @@ class Ledyer_Checkout_For_WooCommerce {
 	/**
 	 * Init meta box on admin hook.
 	 */
-	public function on_admin_init() {
+	public function on_admin_init(): void {
 		new Meta_Box();
 	}
 
@@ -371,10 +376,8 @@ class Ledyer_Checkout_For_WooCommerce {
 	 * Modify checkout fields
 	 *
 	 * @access public
-	 *
-	 * @param array $checkout_fields
-	 *
-	 * @return array $checkout_fields
+	 * @param array $checkout_fields The checkout fields.
+	 * @return array $checkout_fields The modified checkout fields.
 	 */
 	public function modify_checkout_fields( $checkout_fields ) {
 

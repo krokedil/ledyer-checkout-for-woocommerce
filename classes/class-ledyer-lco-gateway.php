@@ -136,19 +136,19 @@ if ( class_exists( 'WC_Payment_Gateway' ) ) {
 				return;
 			}
 
-			$scriptSrcUrl = 'https://checkout.live.ledyer.com/bootstrap.js';
+			$script_src_url = 'https://checkout.live.ledyer.com/bootstrap.js';
 
 			if ( $this->testmode ) {
 				switch ( ledyer()->get_setting( 'development_test_environment' ) ) {
 					case 'local':
 					case 'local-fe':
-						$scriptSrcUrl = 'http://localhost:1337/bootstrap.iife.js';
+						$script_src_url = 'http://localhost:1337/bootstrap.iife.js';
 						break;
 					case 'development':
-						$scriptSrcUrl = 'https://checkout.dev.ledyer.com/bootstrap.js';
+						$script_src_url = 'https://checkout.dev.ledyer.com/bootstrap.js';
 						break;
 					default:
-						$scriptSrcUrl = 'https://checkout.sandbox.ledyer.com/bootstrap.js';
+						$script_src_url = 'https://checkout.sandbox.ledyer.com/bootstrap.js';
 						break;
 				}
 			}
@@ -156,7 +156,7 @@ if ( class_exists( 'WC_Payment_Gateway' ) ) {
 			// Register iframe script
 			wp_register_script(
 				'lco-iframe',
-				$scriptSrcUrl,
+				$script_src_url,
 				array( 'jquery', 'wc-cart' ),
 				LCO_WC_VERSION,
 				true
@@ -482,7 +482,7 @@ if ( class_exists( 'WC_Payment_Gateway' ) ) {
 				$buy_button_color = ledyer()->get_setting( 'color_button' );
 				$no_padding       = 'yes' === ledyer()->get_setting( 'iframe_padding' ) ? 'false' : 'true';
 				$lco_order_id     = WC()->session->get( 'lco_wc_session_id' );
-        $vertical_layout  = 'yes' === ledyer()->get_setting( 'vertical_layout') ? 'true' : 'false';
+				$vertical_layout  = 'yes' === ledyer()->get_setting( 'vertical_layout' ) ? 'true' : 'false';
 
 				if ( is_order_received_page() ) {
 					$order_key = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
@@ -710,6 +710,12 @@ if ( class_exists( 'WC_Payment_Gateway' ) ) {
 			<?php
 		}
 
+		/**
+		 * Save custom fields for Ledyer order.
+		 *
+		 * @param int $order_id The WooCommerce order ID.
+		 * @return void
+		 */
 		public function ledyer_order_save_custom_fields( $order_id ) {
 			$order = wc_get_order( $order_id );
 			if ( ! $order ) {
@@ -727,7 +733,7 @@ if ( class_exists( 'WC_Payment_Gateway' ) ) {
 		/**
 		 * Validate edit Ledyer order.
 		 *
-		 * @param $order The woo order (must contain changes array)
+		 * @param int $order_id The WooCommerce order ID.
 		 */
 		public function lom_validate_lom_edit_ledyer_order( $order_id ) {
 
@@ -758,15 +764,36 @@ if ( class_exists( 'WC_Payment_Gateway' ) ) {
 				$this->lom_validate_customer_field( $order, '_shipping_phone', 9, 30 );
 				$this->lom_validate_customer_email( $order, '_shipping_email' );
 		}
-		public function lom_validate_customer_field( $order, $fieldName, $min, $max ) {
-			$value = sanitize_text_field( $_POST[ $fieldName ] );
+
+		/**
+		 * Validates customer field length
+		 *
+		 * @param WC_Order $order The WooCommerce order object.
+		 * @param string   $field_name The field name to validate.
+		 * @param int      $min Minimum allowed length.
+		 * @param int      $max Maximum allowed length.
+		 * @return void
+		 */
+		public function lom_validate_customer_field( $order, $field_name, $min, $max ) {
+			if ( ! isset( $_POST[ $field_name ] ) ) {
+				return;
+			}
+			$value = sanitize_text_field( $_POST[ $field_name ] );
 			$valid = $this->lom_validate_field_length( $value, $min, $max );
 			if ( ! $valid ) {
-				$order->add_order_note( 'Ledyer customer data could not be updated. Invalid ' . $fieldName );
+				$order->add_order_note( 'Ledyer customer data could not be updated. Invalid ' . $field_name );
 				wp_safe_redirect( wp_get_referer() );
 				exit;
 			}
 		}
+		/**
+		 * Validates field length
+		 *
+		 * @param string $str The string to validate.
+		 * @param int    $min Minimum allowed length.
+		 * @param int    $max Maximum allowed length.
+		 * @return bool True if valid length, false otherwise.
+		 */
 		public function lom_validate_field_length( $str, $min, $max ) {
 			if ( ! $str ) {
 				return true;
@@ -774,19 +801,36 @@ if ( class_exists( 'WC_Payment_Gateway' ) ) {
 			$len = strlen( $str );
 			return ! ( $len < $min || $len > $max );
 		}
-		public function lom_validate_customer_email( $order, $fieldName ) {
-			$value = sanitize_text_field( $_POST[ $fieldName ] );
+
+		/**
+		 * Validates customer email field
+		 *
+		 * @param WC_Order $order The WooCommerce order object.
+		 * @param string   $field_name The field name to validate.
+		 * @return bool
+		 */
+		public function lom_validate_customer_email( $order, $field_name ) {
+			if ( ! isset( $_POST[ $field_name ] ) ) {
+				return true;
+			}
+			$value = sanitize_text_field( wp_unslash( $_POST[ $field_name ] ) );
 			if ( ! $value ) {
 				return true;
 			}
 			$valid = is_email( $value );
 			if ( ! $valid ) {
-				$order->add_order_note( 'Ledyer customer data could not be updated. Invalid ' . $fieldName );
+				$order->add_order_note( 'Ledyer customer data could not be updated. Invalid ' . $field_name );
 				wp_safe_redirect( wp_get_referer() );
 				exit;
 			}
 		}
 
+		/**
+		 * Checks if order is allowed to be edited
+		 *
+		 * @param WC_Order $order The WooCommerce order object.
+		 * @return bool
+		 */
 		public function lom_allow_editing( $order ) {
 			$is_ledyer_order = $this->lom_order_placed_with_ledyer( $order->get_payment_method() );
 			if ( ! $is_ledyer_order ) {
@@ -800,6 +844,12 @@ if ( class_exists( 'WC_Payment_Gateway' ) ) {
 			return true;
 		}
 
+		/**
+		 * Checks if order was placed using Ledyer.
+		 *
+		 * @param string $payment_method The payment method to check.
+		 * @return bool True if order was placed with Ledyer, false otherwise.
+		 */
 		public function lom_order_placed_with_ledyer( $payment_method ) {
 			if ( in_array( $payment_method, array( 'ledyer_payments', 'lco' ) ) ) {
 				return true;

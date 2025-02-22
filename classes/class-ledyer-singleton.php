@@ -16,16 +16,25 @@ namespace Ledyer;
  */
 trait Singleton {
 
-	/** @var self */
+	/**
+	 * Instance of the singleton class
+	 *
+	 * @var self
+	 */
 	private static $instance = null;
-	/** @var settings */
+
+	/**
+	 * Settings array for the singleton class
+	 *
+	 * @var array
+	 */
 	private static $settings = array();
 
-  /**
-   * Instantiate the class.
-   *
-   * @return self
-   */
+	/**
+	 * Instantiate the class.
+	 *
+	 * @return self
+	 */
 	public static function instance(): self {
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
@@ -68,4 +77,3 @@ trait Singleton {
 	public function set_settings(): void {
 	}
 }
-

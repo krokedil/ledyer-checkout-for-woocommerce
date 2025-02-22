@@ -30,10 +30,10 @@ class AJAX extends \WC_AJAX {
 	 */
 	public static function add_ajax_events() {
 		$ajax_events = array(
-			'lco_wc_update_cart'                    => true,
-			'lco_wc_change_payment_method'          => true,
-			'lco_wc_get_ledyer_order'               => true,
-			'lco_wc_log_js'                         => true,
+			'lco_wc_update_cart'           => true,
+			'lco_wc_change_payment_method' => true,
+			'lco_wc_get_ledyer_order'      => true,
+			'lco_wc_log_js'                => true,
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -60,9 +60,9 @@ class AJAX extends \WC_AJAX {
 
 		$values = array();
 		if ( isset( $_POST['checkout'] ) ) {
-			$response = sanitize_url(wp_unslash( $_POST['checkout'] ));
-			parse_str( html_entity_decode($response), $values );
-			$values=filter_var_array($values, FILTER_SANITIZE_ENCODED);
+			$response = sanitize_url( wp_unslash( $_POST['checkout'] ) );
+			parse_str( html_entity_decode( $response ), $values );
+			$values = filter_var_array( $values, FILTER_SANITIZE_ENCODED );
 		}
 
 		$cart = $values['cart'];
@@ -75,8 +75,8 @@ class AJAX extends \WC_AJAX {
 		WC()->cart->calculate_totals();
 
 		$ledyer_order_id = WC()->session->get( 'lco_wc_order_id' );
-		$data              = \Ledyer\Requests\Helpers\Woocommerce_Bridge::get_updated_cart_data();
-		$ledyer_order = ledyer()->api->update_order_session( $ledyer_order_id, $data );
+		$data            = \Ledyer\Requests\Helpers\Woocommerce_Bridge::get_updated_cart_data();
+		$ledyer_order    = ledyer()->api->update_order_session( $ledyer_order_id, $data );
 
 		// If the update failed return error.
 		if ( is_wp_error( $ledyer_order ) ) {
@@ -161,14 +161,13 @@ class AJAX extends \WC_AJAX {
 
 		$customer_fields = self::set_customer_data( $ledyer_order );
 
-		if( ! $customer_fields ) {
+		if ( ! $customer_fields ) {
 			wp_send_json_error( 'customer data not set' );
 			exit;
 		}
 
 		wp_send_json_success( $customer_fields );
 		wp_die();
-
 	}
 	/**
 	 * Sets hidden customer fields using info from Ledyer order.
@@ -186,13 +185,13 @@ class AJAX extends \WC_AJAX {
 
 				switch ( $key ) {
 					case 'billing_first_name':
-						$fields['billing_address'][ $key ]  = $ledyer_order['customer']['firstName'];
+						$fields['billing_address'][ $key ] = $ledyer_order['customer']['firstName'];
 						break;
 					case 'shipping_first_name':
 						$fields['shipping_address'][ $key ] = isset( $ledyer_order['customer']['shippingAddress']['contact'] ) ? $ledyer_order['customer']['shippingAddress']['contact']['firstName'] : '';
 						break;
 					case 'billing_last_name':
-						$fields['billing_address'][ $key ]  = $ledyer_order['customer']['lastName'];
+						$fields['billing_address'][ $key ] = $ledyer_order['customer']['lastName'];
 						break;
 					case 'shipping_last_name':
 						$fields['shipping_address'][ $key ] = isset( $ledyer_order['customer']['shippingAddress']['contact'] ) ? $ledyer_order['customer']['shippingAddress']['contact']['lastName'] : '';

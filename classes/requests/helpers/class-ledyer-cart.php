@@ -92,8 +92,8 @@ class Cart {
 	}
 
 	/**
-	 * Gets order total amount eligible for tax for Ledyer API 
-	 * Note that this excludes multipurpose vouchers/giftcards. 
+	 * Gets order total amount eligible for tax for Ledyer API
+	 * Note that this excludes multipurpose vouchers/giftcards.
 	 * Use get_order_amount for regular total amount
 	 *
 	 * @return int
@@ -101,10 +101,10 @@ class Cart {
 	public function get_order_taxable_amount() {
 		$total_amount = 0;
 		foreach ( $this->order_lines as $order_line ) {
-			$lineTotal = $order_line['totalAmount'];
-			$multiPurposeVoucher = 'giftCard' === $order_line['type'] && $order_line['vat'] == 0 && $lineTotal < 0;
-			if ( !$multiPurposeVoucher ) {
-				$total_amount += $lineTotal;
+			$line_total            = $order_line['totalAmount'];
+			$multi_purpose_voucher = 'giftCard' === $order_line['type'] && 0 === $order_line['vat'] && $line_total < 0;
+			if ( ! $multi_purpose_voucher ) {
+				$total_amount += $line_total;
 			}
 		}
 
@@ -158,12 +158,12 @@ class Cart {
 				$this->quantity            = $cart_item['quantity'];
 
 				$ledyer_item = array(
-					'reference'          => $this->get_item_reference( $product ),
-					'description'        => $this->get_item_name( $cart_item ),
-					'quantity'           => $this->get_item_quantity( $cart_item ),
-					'vat'                => $this->get_item_tax_rate( $cart_item, $product ),
-					'totalAmount'        => $this->get_item_total_amount( $cart_item, $product ),
-					'totalVatAmount'     => $this->get_item_tax_amount( $cart_item, $product ),
+					'reference'      => $this->get_item_reference( $product ),
+					'description'    => $this->get_item_name( $cart_item ),
+					'quantity'       => $this->get_item_quantity( $cart_item ),
+					'vat'            => $this->get_item_tax_rate( $cart_item, $product ),
+					'totalAmount'    => $this->get_item_total_amount( $cart_item, $product ),
+					'totalVatAmount' => $this->get_item_tax_amount( $cart_item, $product ),
 				);
 
 				// Product type.
@@ -172,7 +172,6 @@ class Cart {
 				} else {
 					$ledyer_item['type'] = 'physical';
 				}
-
 
 				$this->order_lines[] = apply_filters( 'lco_wc_cart_line_item', $ledyer_item, $cart_item );
 			}
@@ -188,7 +187,7 @@ class Cart {
 
 			$this->customer = array(
 				'country'  => $customer->get_billing_country(),
-				'currency' => get_woocommerce_currency()
+				'currency' => get_woocommerce_currency(),
 			);
 		}
 	}
@@ -208,13 +207,13 @@ class Cart {
 	public function process_shipping() {
 		if ( WC()->shipping->get_packages() && ! empty( WC()->session->get( 'chosen_shipping_methods' ) ) ) {
 			$shipping            = array(
-				'type'               => 'shippingFee',
-				'reference'          => $this->get_shipping_reference(),
-				'description'        => $this->get_shipping_name(),
-				'quantity'           => 1,
-				'vat'                => $this->get_shipping_tax_rate(),
-				'totalAmount'        => $this->get_shipping_amount(),
-				'totalVatAmount'     => $this->get_shipping_tax_amount(),
+				'type'           => 'shippingFee',
+				'reference'      => $this->get_shipping_reference(),
+				'description'    => $this->get_shipping_name(),
+				'quantity'       => 1,
+				'vat'            => $this->get_shipping_tax_rate(),
+				'totalAmount'    => $this->get_shipping_amount(),
+				'totalVatAmount' => $this->get_shipping_tax_amount(),
 			);
 			$this->order_lines[] = $shipping;
 		}
@@ -226,11 +225,11 @@ class Cart {
 	public function process_coupons() {
 		if ( ! empty( WC()->cart->get_coupons() ) ) {
 			foreach ( WC()->cart->get_coupons() as $coupon_key => $coupon ) {
-				$coupon_description 	= 'Gift card';
-				$coupon_reference	  	= substr( (string) $coupon_key, 0, 64 );
-				$coupon_amount     		= 0;
+				$coupon_description     = 'Gift card';
+				$coupon_reference       = substr( (string) $coupon_key, 0, 64 );
+				$coupon_amount          = 0;
 				$coupon_discount_amount = 0;
-				$coupon_tax_amount 		= 0;
+				$coupon_tax_amount      = 0;
 
 				// Smart coupons are processed as real line items, cart and product discounts sent for reference only.
 				if ( 'smart_coupon' === $coupon->get_discount_type() ) {
@@ -238,12 +237,12 @@ class Cart {
 					// If Smart coupon is applied before tax calculation,
 					// the sum is discounted from order lines so we send it as 0 for reference.
 					if ( wc_tax_enabled() && 'yes' === $apply_before_tax ) {
-						$coupon_amount    	= 0;
+						$coupon_amount      = 0;
 						$coupon_description = __( 'Gift card', 'ledyer-checkout-for-woocommerce' ) . ' (amount: ' . WC()->cart->get_coupon_discount_amount( $coupon_key ) . ')';
 					} else {
-						$coupon_discount_amount	= WC()->cart->get_coupon_discount_amount( $coupon_key ) * 100;
-						$coupon_amount    		= - WC()->cart->get_coupon_discount_amount( $coupon_key ) * 100;
-						$coupon_description 	= __( 'Discount', 'ledyer-checkout-for-woocommerce' );
+						$coupon_discount_amount = WC()->cart->get_coupon_discount_amount( $coupon_key ) * 100;
+						$coupon_amount          = - WC()->cart->get_coupon_discount_amount( $coupon_key ) * 100;
+						$coupon_description     = __( 'Discount', 'ledyer-checkout-for-woocommerce' );
 					}
 					$coupon_tax_amount = - WC()->cart->get_coupon_discount_tax_amount( $coupon_key ) * 100;
 				}
@@ -251,13 +250,13 @@ class Cart {
 				// Add separate discount line item, but only if it's a smart coupon or country is US.
 				if ( 'smart_coupon' === $coupon->get_discount_type() ) {
 					$discount            = array(
-						'type'               => 'discount',
-						'reference'          => $coupon_reference,
-						'description'        => $coupon_description,
-						'quantity'           => 1,
-						'vat'                => 2500,
-						'totalAmount'        => $coupon_amount,
-						'totalVatAmount'     => - self::format_number( $coupon_tax_amount ),
+						'type'           => 'discount',
+						'reference'      => $coupon_reference,
+						'description'    => $coupon_description,
+						'quantity'       => 1,
+						'vat'            => 2500,
+						'totalAmount'    => $coupon_amount,
+						'totalVatAmount' => - self::format_number( $coupon_tax_amount ),
 					);
 					$this->order_lines[] = $discount;
 				}
@@ -282,13 +281,13 @@ class Cart {
 				$gift_card_amount = - $giftcards_used['total_amount'] * 100;
 
 				$gift_card = array(
-					'type'                  => 'giftCard',
-					'reference'             => $gift_card_code,
-					'description'           => __( 'Gift card', 'ledyer-checkout-for-woocommerce' ),
-					'quantity'              => 1,
-					'vat'             		=> 0,
-					'totalAmount'          	=> $gift_card_amount,
-					'totalVatAmount'  	    => 0,
+					'type'           => 'giftCard',
+					'reference'      => $gift_card_code,
+					'description'    => __( 'Gift card', 'ledyer-checkout-for-woocommerce' ),
+					'quantity'       => 1,
+					'vat'            => 0,
+					'totalAmount'    => $gift_card_amount,
+					'totalVatAmount' => 0,
 				);
 
 				$this->order_lines[] = $gift_card;
@@ -306,13 +305,13 @@ class Cart {
 				$giftcard_sku      = apply_filters( 'lco_yith_gift_card_sku', esc_html( __( 'giftcard', 'ledyer-checkout-for-woocommerce' ) ), $code );
 
 				$gift_card           = array(
-					'type'                  => 'giftCard',
-					'reference'             => $giftcard_sku,
-					'description'          	=> $label,
-					'quantity'              => 1,
-					'vat'	     	        => 0,
-					'totalAmount'        	=> $coupon_amount,
-					'totalVatAmount'      	=> 0,
+					'type'           => 'giftCard',
+					'reference'      => $giftcard_sku,
+					'description'    => $label,
+					'quantity'       => 1,
+					'vat'            => 0,
+					'totalAmount'    => $coupon_amount,
+					'totalVatAmount' => 0,
 				);
 				$this->order_lines[] = $gift_card;
 			}
@@ -326,13 +325,13 @@ class Cart {
 				$label               = esc_html__( 'Gift card', 'pw-woocommerce-gift-cards' ) . ' ' . $code;
 				$gift_card_sku       = apply_filters( 'lco_pw_gift_card_sku', esc_html__( 'giftcard', 'ledyer-checkout-for-woocommerce' ), $code );
 				$gift_card           = array(
-					'type'                  => 'giftCard',
-					'reference'             => $gift_card_sku,
-					'description'           => $label,
-					'quantity'              => 1,
-					'vat'                   => 0,
-					'totalAmount'           => $coupon_amount,
-					'totalVatAmount'        => 0,
+					'type'           => 'giftCard',
+					'reference'      => $gift_card_sku,
+					'description'    => $label,
+					'quantity'       => 1,
+					'vat'            => 0,
+					'totalAmount'    => $coupon_amount,
+					'totalVatAmount' => 0,
 				);
 				$this->order_lines[] = $gift_card;
 			}
@@ -362,13 +361,13 @@ class Cart {
 
 				// Add separate discount line item, but only if it's a smart coupon or country is US.
 				$fee_item            = array(
-					'type'               => 'surcharge',
-					'reference'          => substr( $fee->id, 0, 64 ),
-					'description'        => $fee->name,
-					'quantity'           => 1,
-					'vat'                => $fee_tax_rate,
-					'totalAmount'        => $fee_amount,
-					'totalVatAmount'     => $fee_tax_amount,
+					'type'           => 'surcharge',
+					'reference'      => substr( $fee->id, 0, 64 ),
+					'description'    => $fee->name,
+					'quantity'       => 1,
+					'vat'            => $fee_tax_rate,
+					'totalAmount'    => $fee_amount,
+					'totalVatAmount' => $fee_tax_amount,
 				);
 				$this->order_lines[] = $fee_item;
 			}
@@ -385,7 +384,6 @@ class Cart {
 	 * @return string $item_name Cart item name.
 	 * @since  1.0.0
 	 * @access public
-	 *
 	 */
 	public function get_item_name( $cart_item ) {
 		$item_name = substr( $cart_item['data']->get_name(), 0, 254 );
@@ -396,13 +394,12 @@ class Cart {
 	/**
 	 * Calculate item tax percentage.
 	 *
-	 * @param array $cart_item Cart item.
+	 * @param array      $cart_item Cart item.
 	 * @param WC_Product $product WooCommerce product.
 	 *
 	 * @return integer $item_tax_amount Item tax amount.
 	 * @since  1.0.0
 	 * @access public
-	 *
 	 */
 	public function get_item_tax_amount( $cart_item, $product ) {
 		$item_total_amount       = $this->get_item_total_amount( $cart_item, $product );
@@ -415,13 +412,12 @@ class Cart {
 	/**
 	 * Calculate item tax percentage.
 	 *
-	 * @param array $cart_item Cart item.
+	 * @param array  $cart_item Cart item.
 	 * @param object $product Product object.
 	 *
 	 * @return integer $item_tax_rate Item tax percentage formatted for Ledyer.
 	 * @since  1.0.0
 	 * @access public
-	 *
 	 */
 	public function get_item_tax_rate( $cart_item, $product ) {
 		if ( $product->is_taxable() && $cart_item['line_subtotal_tax'] > 0 ) {
@@ -450,7 +446,6 @@ class Cart {
 	 * @return integer $item_quantity Cart item quantity.
 	 * @since  1.0.0
 	 * @access public
-	 *
 	 */
 	public function get_item_quantity( $cart_item ) {
 		return round( $cart_item['quantity'] );
@@ -466,7 +461,6 @@ class Cart {
 	 * @return string $item_reference Cart item reference.
 	 * @since  1.0.0
 	 * @access public
-	 *
 	 */
 	public function get_item_reference( $product ) {
 		if ( $product->get_sku() ) {
@@ -486,7 +480,6 @@ class Cart {
 	 * @return integer $item_discount_rate Cart item discount rate.
 	 * @since  1.0.0
 	 * @access public
-	 *
 	 */
 	public function get_item_discount_rate( $cart_item ) {
 		$item_discount_rate = ( 1 - ( $cart_item['line_total'] / $cart_item['line_subtotal'] ) ) * 100 * 100;
@@ -497,13 +490,12 @@ class Cart {
 	/**
 	 * Get cart item total amount.
 	 *
-	 * @param array $cart_item Cart item.
+	 * @param array      $cart_item Cart item.
 	 * @param WC_Product $product WooCommerce product.
 	 *
 	 * @return integer $item_total_amount Cart item total amount.
 	 * @since  1.0.0
 	 * @access public
-	 *
 	 */
 	public function get_item_total_amount( $cart_item, $product ) {
 
@@ -518,7 +510,6 @@ class Cart {
 	 * @return string $shipping_name Name for selected shipping method.
 	 * @since  1.0.0
 	 * @access public
-	 *
 	 */
 	public function get_shipping_name() {
 		$shipping_packages = WC()->shipping->get_packages();
@@ -546,7 +537,6 @@ class Cart {
 	 * @return string $shipping_reference Reference for selected shipping method.
 	 * @since  1.0.0
 	 * @access public
-	 *
 	 */
 	public function get_shipping_reference() {
 		$shipping_packages = WC()->shipping->get_packages();
@@ -574,7 +564,6 @@ class Cart {
 	 * @return integer $shipping_amount Amount for selected shipping method.
 	 * @since  1.0.0
 	 * @access public
-	 *
 	 */
 	public function get_shipping_amount() {
 		$shipping_amount = WC()->cart->shipping_total + WC()->cart->shipping_tax_total;
@@ -588,7 +577,6 @@ class Cart {
 	 * @return integer $shipping_tax_rate Tax rate for selected shipping method.
 	 * @since  1.0.0
 	 * @access public
-	 *
 	 */
 	public function get_shipping_tax_rate() {
 
@@ -613,7 +601,6 @@ class Cart {
 	 * @return integer $shipping_tax_amount Tax amount for selected shipping method.
 	 * @since  1.0.0
 	 * @access public
-	 *
 	 */
 	public function get_shipping_tax_amount() {
 		$shiping_total_amount        = $this->get_shipping_amount();

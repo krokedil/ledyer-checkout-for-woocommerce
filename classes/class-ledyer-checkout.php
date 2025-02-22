@@ -7,6 +7,7 @@
  * @package Ledyer
  * @since   1.0.0
  */
+
 namespace Ledyer;
 
 \defined( 'ABSPATH' ) || die();
@@ -45,7 +46,7 @@ class Checkout {
 		$ledyer_order = ledyer()->api->get_order_session( $ledyer_order_id );
 
 		if ( $ledyer_order ) {
-			$data              = \Ledyer\Requests\Helpers\Woocommerce_Bridge::get_updated_cart_data();
+			$data         = \Ledyer\Requests\Helpers\Woocommerce_Bridge::get_updated_cart_data();
 			$ledyer_order = ledyer()->api->update_order_session( $ledyer_order_id, $data );
 		}
 	}

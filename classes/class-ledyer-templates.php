@@ -19,6 +19,11 @@ class Templates {
 	 */
 	use Singleton;
 
+	/**
+	 * Add filters.
+	 *
+	 * @return void
+	 */
 	public function filters() {
 		// Override template if Ledyer Checkout page.
 
@@ -31,15 +36,20 @@ class Templates {
 		\add_filter( 'woocommerce_billing_fields', array( $this, 'unrequire_wc_billing_state_field' ) );
 		// Unrequire WooCommerce Shipping State field.
 		\add_filter( 'woocommerce_shipping_fields', array( $this, 'unrequire_wc_shipping_state_field' ) );
-		// Chage admin shipping fields in edit order admin panel
+		// Change admin shipping fields in edit order admin panel.
 		\add_filter( 'woocommerce_admin_shipping_fields', array( $this, 'change_admin_shipping_fields' ), 10, 1 );
 	}
 
+	/**
+	 * Add actions.
+	 *
+	 * @return void
+	 */
 	public function actions() {
 		\add_action( 'wp_footer', array( $this, 'check_that_lco_template_has_loaded' ) );
 
 		// Template hooks.
-		add_action( 'lco_wc_after_order_review', 'lco_wc_add_extra_checkout_fields', 10 );
+		\add_action( 'lco_wc_after_order_review', 'lco_wc_add_extra_checkout_fields', 10 );
 		add_action( 'lco_wc_after_order_review', 'lco_wc_show_another_gateway_button', 20 );
 		add_action( 'lco_wc_before_snippet', array( $this, 'add_wc_form' ), 10 );
 	}
@@ -214,7 +224,7 @@ class Templates {
 	/**
 	 * Change Shipping fields in edit order page
 	 *
-	 * @param $fields
+	 * @param array $fields The shipping fields
 	 *
 	 * @return mixed
 	 */
@@ -228,7 +238,7 @@ class Templates {
 		}
 
 		if ( 'lco' === $order->get_payment_method() ) {
-			// Unset shipping phone
+			// Unset shipping phone.
 			unset( $fields['phone'] );
 		}
 

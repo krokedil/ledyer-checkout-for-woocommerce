@@ -1,15 +1,25 @@
 {
   "version": "1.0.0",
-  "name": "maksimer/ledyer-checkout-for-woocommerce",
+  "name": "ledyer/checkout-for-woocommerce",
   "type": "wordpress-plugin",
   "license": "GPLv2",
-  "authors": [
-    {
-      "name": "Maksimer",
-      "email": "post@maksimer.no"
+  "require-dev": {
+    "php-stubs/wordpress-stubs": "*",
+    "php-stubs/woocommerce-stubs": "dev-master",
+    "wp-coding-standards/wpcs": "^3.1",
+    "squizlabs/php_codesniffer": "*",
+    "phpcsstandards/phpcsutils": "^1.0",
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0"
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
     }
-  ],
+  },
   "scripts": {
-    "build-assets": "npm ci && npm run build"
+    "build-assets": "npm ci && npm run build",
+    "install-codestandards": [
+      "Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\Plugin::run"
+    ]
   }
 }
