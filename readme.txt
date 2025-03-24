@@ -12,6 +12,9 @@ License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
 == Changelog ==
+= 2025.03.10    - version 1.11.1 =
+* Fix           - Added fallbacks to ensure the locale sent from WooCommerce always follows the BCP47 standard, addressing inconsistencies caused by certain plugins.
+
 = 2025.01.30    - version 1.11.0 =
 * Feature       - Setting for card when autocapture is activated
 

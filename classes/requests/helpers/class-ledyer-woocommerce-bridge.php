@@ -36,7 +36,7 @@ class Woocommerce_Bridge {
 		$cart->process_data();
 
 		$data = array(
-			'locale'                  => \get_locale(),
+			'locale'                  => self::get_bcp47_locale(),
 			'metadata'                => null,
 			'orderLines'              => $cart->get_order_lines(),
 			'reference'               => null,
@@ -70,7 +70,7 @@ class Woocommerce_Bridge {
 		$data = array(
 			'country'                 => $order->get_billing_country(),
 			'currency'                => $order->get_currency(),
-			'locale'                  => \get_locale(),
+			'locale'                  => self::get_bcp47_locale(),
 			'metadata'                => null,
 			'orderLines'              => $order_helper->get_order_lines(),
 			'reference'               => null,
@@ -109,7 +109,7 @@ class Woocommerce_Bridge {
 		$cart->process_data();
 
 		$data = array(
-			'locale'                  => get_locale(),
+			'locale'                  => self::get_bcp47_locale(),
 			'orderLines'              => $cart->get_order_lines(),
 			'settings'                => self::get_order_settings( false ),
 			'totalOrderAmount'        => $cart->get_order_amount(),
@@ -128,6 +128,32 @@ class Woocommerce_Bridge {
 		);
 
 		return apply_filters( 'lco_' . __FUNCTION__, $data );
+	}
+
+	/**
+	 * Get locale in BCP 47 format. usually get_locale() returns xx_XX format
+	 * however in some causes (due to plugins) it might come as xx.
+	 *
+	 * @return string
+	 */
+	private static function get_bcp47_locale() {
+		$locale = \get_locale();
+		if ( 'en' === $locale ) {
+			$locale = 'en-US';
+		} elseif ( 'sv' === $locale ) {
+			$locale = 'sv-SE';
+		} elseif ( 'nb' === $locale || 'no' === $locale ) {
+			$locale = 'no-NO';
+		} elseif ( 'fi' === $locale ) {
+			$locale = 'fi-FI';
+		} elseif ( 'da' === $locale ) {
+			$locale = 'da-DK';
+		} elseif ( preg_match( '/^[a-z]{2}_[A-Z]{2}$/', $locale ) ) {
+			$locale = str_replace( '_', '-', $locale );
+		}
+
+		\Ledyer\Logger::log( 'Using locale: ' . $locale );
+		return $locale;
 	}
 
 	/**
