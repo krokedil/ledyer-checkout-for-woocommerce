@@ -65,21 +65,6 @@ class Ledyer_Checkout_For_WooCommerce {
 		\add_action( 'admin_init', array( $this, 'on_admin_init' ) );
 
 		add_action(
-			'rest_api_init',
-			function () {
-				register_rest_route(
-					'ledyer/v1',
-					'/notifications/',
-					array(
-						'methods'             => 'POST',
-						'callback'            => array( $this, 'handle_notification' ),
-						'permission_callback' => '__return_true',
-					)
-				);
-			}
-		);
-
-		add_action(
 			'woocommerce_checkout_fields',
 			array(
 				$this,
@@ -90,144 +75,6 @@ class Ledyer_Checkout_For_WooCommerce {
 		);
 
 		add_action( 'schedule_process_notification', array( $this, 'process_notification' ), 10, 2 );
-	}
-
-	/**
-	 * Handles notification callbacks
-	 *
-	 * @param \WP_REST_Request $request The incoming request object.
-	 * @return \WP_REST_Response
-	 */
-	public function handle_notification( \WP_REST_Request $request ) {
-		$request_body = json_decode( $request->get_body() );
-		$response     = new \WP_REST_Response();
-
-		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			Logger::log( 'Request body isn\'t valid JSON string.' );
-			$response->set_status( 400 );
-			return $response;
-		}
-
-		$ledyer_event_type = $request_body->{'eventType'};
-		$ledyer_order_id   = $request_body->{'orderId'};
-
-		if ( null === $ledyer_event_type || null === $ledyer_order_id ) {
-			Logger::log( 'Request body doesn\'t hold orderId and eventType data.' );
-			$response->set_status( 400 );
-			return $response;
-		}
-
-		$scheduleId = as_schedule_single_action( time() + 120, 'schedule_process_notification', array( $ledyer_order_id, $ledyer_event_type ) );
-		Logger::log( 'Enqueued notification: ' . $ledyer_event_type . ', schedule-id:' . $scheduleId );
-		$response->set_status( 200 );
-		return $response;
-	}
-
-	public function process_notification( $ledyer_order_id, $ledyer_event_type ) {
-		Logger::log( 'process notification: ' . $ledyer_order_id );
-
-		$orders = wc_get_orders(
-			array(
-				'meta_key'     => '_wc_ledyer_order_id',
-				'meta_value'   => $ledyer_order_id,
-				'meta_compare' => '=',
-				'date_created' => '>' . ( time() - MONTH_IN_SECONDS ),
-			),
-		);
-
-		$order_id = isset( $orders[0] ) ? $orders[0]->get_id() : null;
-		$order    = wc_get_order( $order_id );
-
-		Logger::log( 'Order to process: ' . $order_id );
-
-		if ( ! is_object( $order ) ) {
-			Logger::log( 'Could not find woo order with ledyer id: ' . $ledyer_order_id );
-			return;
-		}
-
-		if ( 'com.ledyer.order.ready_for_capture' === $ledyer_event_type ) {
-			$order->update_meta_data( '_ledyer_ready_for_capture', true );
-			$order->save();
-			return;
-		}
-
-		$ledyer_payment_status = ledyer()->api->get_payment_status( $ledyer_order_id );
-		if ( is_wp_error( $ledyer_payment_status ) ) {
-			\Ledyer\Logger::log( 'Could not get ledyer payment status ' . $ledyer_order_id );
-			return;
-		}
-
-		$ack_order = false;
-
-		switch ( $ledyer_payment_status['status'] ) {
-			case \LedyerPaymentStatus::PAYMENT_PENDING:
-				if ( ! $order->has_status( array( 'on-hold', 'processing', 'completed' ) ) ) {
-					$note = sprintf(
-						__(
-							'New payment created in Ledyer with Payment ID %1$s. %2$s',
-							'ledyer-checkout-for-woocommerce'
-						),
-						$ledyer_order_id,
-						$ledyer_payment_status['note']
-					);
-					$order->update_status( 'on-hold', $note );
-					$ack_order = true;
-				}
-				break;
-			case \LedyerPaymentStatus::PAYMENT_CONFIRMED:
-				if ( ! $order->has_status( array( 'processing', 'completed' ) ) ) {
-					$note = sprintf(
-						__(
-							'New payment created in Ledyer with Payment ID %1$s. %2$s',
-							'ledyer-checkout-for-woocommerce'
-						),
-						$ledyer_order_id,
-						$ledyer_payment_status['note']
-					);
-					$order->add_order_note( $note );
-					$order->payment_complete( $ledyer_order_id );
-					$ack_order = true;
-				}
-				break;
-			case \LedyerPaymentStatus::ORDER_CAPTURED:
-				$new_status = 'completed';
-
-				$settings = get_option( 'woocommerce_lco_settings' );
-
-				// Check if we should keep card payments in processing status.
-				if (
-					isset( $settings['keep_cards_processing'] )
-					&& 'yes' === $settings['keep_cards_processing']
-					&& isset( $ledyer_payment_status['paymentMethod'] )
-					&& isset( $ledyer_payment_status['paymentMethod']['type'] )
-					&& 'card' === $ledyer_payment_status['paymentMethod']['type']
-				) {
-					$new_status = 'processing';
-				}
-
-				$new_status = apply_filters( 'lco_captured_update_status', $new_status, $ledyer_payment_status );
-				$order->update_status( $new_status );
-				break;
-			case \LedyerPaymentStatus::ORDER_REFUNDED:
-				$order->update_status( 'refunded' );
-				break;
-			case \LedyerPaymentStatus::ORDER_CANCELLED:
-				$order->update_status( 'cancelled' );
-				break;
-		}
-
-		if ( $ack_order ) {
-			$response = ledyer()->api->acknowledge_order( $ledyer_order_id );
-			if ( is_wp_error( $response ) ) {
-				\Ledyer\Logger::log( 'Couldn\'t acknowledge order ' . $ledyer_order_id );
-				return;
-			}
-			$ledyer_update_order = ledyer()->api->update_order_reference( $ledyer_order_id, array( 'reference' => $order->get_order_number() ) );
-			if ( is_wp_error( $ledyer_update_order ) ) {
-				\Ledyer\Logger::log( 'Couldn\'t set merchant reference ' . $order->get_order_number() );
-				return;
-			}
-		}
 	}
 
 
@@ -248,6 +95,8 @@ class Ledyer_Checkout_For_WooCommerce {
 		Templates::instance();
 		Confirmation::instance();
 		Checkout::instance();
+		Callback::instance();
+
 		// Set class variables.
 		$this->credentials   = Credentials::instance();
 		$this->merchant_urls = new Merchant_URLs();
@@ -295,6 +144,7 @@ class Ledyer_Checkout_For_WooCommerce {
 		include_once LCO_WC_PLUGIN_PATH . '/classes/class-ledyer-merchant-urls.php';
 		include_once LCO_WC_PLUGIN_PATH . '/classes/class-ledyer-templates.php';
 		include_once LCO_WC_PLUGIN_PATH . '/classes/class-ledyer-hpp.php';
+		include_once LCO_WC_PLUGIN_PATH . '/classes/class-ledyer-callback.php';
 		include_once LCO_WC_PLUGIN_PATH . '/classes/requests/helpers/class-ledyer-order.php';
 	}
 
