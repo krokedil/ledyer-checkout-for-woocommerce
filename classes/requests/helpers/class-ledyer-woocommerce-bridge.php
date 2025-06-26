@@ -6,6 +6,8 @@
  */
 namespace Ledyer\Requests\Helpers;
 
+use Ledyer\Callback;
+
 defined( 'ABSPATH' ) || exit();
 
 /**
@@ -166,6 +168,12 @@ class Woocommerce_Bridge {
 				),
 			);
 		}
+
+		// This should always be set, even if not full.
+		self::$ledyer_settings['urls']['notification'] = apply_filters(
+			'lco_notification_url',
+			home_url( Callback::API_ENDPOINT )
+		);
 	}
 
 	/**
