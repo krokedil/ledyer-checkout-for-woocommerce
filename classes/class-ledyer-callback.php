@@ -81,7 +81,7 @@ class Callback {
 		$response     = new \WP_REST_Response();
 
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			Logger::log( 'Request body isn\'t valid JSON string.' );
+			Logger::log( "Request body isn't valid JSON string." );
 			$response->set_status( 400 );
 			return $response;
 		}
@@ -89,14 +89,14 @@ class Callback {
 		$ledyer_event_type = $request_body->{'eventType'};
 		$ledyer_order_id   = $request_body->{'orderId'};
 
-		if ( null === $ledyer_event_type || null === $ledyer_order_id ) {
-			Logger::log( 'Request body doesn\'t hold orderId and eventType data.' );
+		if ( ! isset( $ledyer_event_type, $ledyer_order_id ) ) {
+			Logger::log( "Request body doesn't hold orderId and eventType data." );
 			$response->set_status( 400 );
 			return $response;
 		}
 
 		$scheduleId = as_schedule_single_action( time() + 120, 'schedule_process_notification', array( $ledyer_order_id, $ledyer_event_type ) );
-		Logger::log( 'Enqueued notification: ' . $ledyer_event_type . ', schedule-id:' . $scheduleId );
+		Logger::log( "Enqueued notification: $ledyer_event_type, schedule-id: $scheduleId" );
 		$response->set_status( 200 );
 		return $response;
 	}
@@ -111,7 +111,7 @@ class Callback {
 	 * @param string $ledyer_event_type The type of event from Ledyer.
 	 */
 	public function process_notification( $ledyer_order_id, $ledyer_event_type ) {
-		Logger::log( 'process notification: ' . $ledyer_order_id );
+		Logger::log( "process notification: $ledyer_order_id" );
 
 		$orders = wc_get_orders(
 			array(
@@ -125,10 +125,10 @@ class Callback {
 		$order_id = isset( $orders[0] ) ? $orders[0]->get_id() : null;
 		$order    = wc_get_order( $order_id );
 
-		Logger::log( 'Order to process: ' . $order_id );
+		Logger::log( "Order to process: $order_id" );
 
 		if ( ! is_object( $order ) ) {
-			Logger::log( 'Could not find woo order with ledyer id: ' . $ledyer_order_id );
+			Logger::log( "Could not find woo order with ledyer id: $ledyer_order_id" );
 			return;
 		}
 
@@ -140,7 +140,7 @@ class Callback {
 
 		$ledyer_payment_status = ledyer()->api->get_payment_status( $ledyer_order_id );
 		if ( is_wp_error( $ledyer_payment_status ) ) {
-			\Ledyer\Logger::log( 'Could not get ledyer payment status ' . $ledyer_order_id );
+			\Ledyer\Logger::log( "Could not get ledyer payment status $ledyer_order_id" );
 			return;
 		}
 
@@ -206,12 +206,12 @@ class Callback {
 		if ( $ack_order ) {
 			$response = ledyer()->api->acknowledge_order( $ledyer_order_id );
 			if ( is_wp_error( $response ) ) {
-				\Ledyer\Logger::log( 'Couldn\'t acknowledge order ' . $ledyer_order_id );
+				\Ledyer\Logger::log( "Couldn't acknowledge order $ledyer_order_id" );
 				return;
 			}
 			$ledyer_update_order = ledyer()->api->update_order_reference( $ledyer_order_id, array( 'reference' => $order->get_order_number() ) );
 			if ( is_wp_error( $ledyer_update_order ) ) {
-				\Ledyer\Logger::log( 'Couldn\'t set merchant reference ' . $order->get_order_number() );
+				\Ledyer\Logger::log( "Couldn't set merchant reference {$order->get_order_number()}" );
 				return;
 			}
 		}
