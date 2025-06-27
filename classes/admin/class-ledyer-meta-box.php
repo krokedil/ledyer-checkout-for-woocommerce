@@ -52,7 +52,7 @@ class Meta_Box {
 		$order    = wc_get_order( $order_id );
 
 		// False if automatic settings are enabled, true if not. If true then show the option.
-		if ( ! empty( $order->get_meta( '_transaction_id', true ) ) && ! empty( $order->get_meta( '_wc_ledyer_order_id', true ) ) ) {
+		if ( ! empty( $order->get_transaction_id() ) && ! empty( $order->get_meta( '_wc_ledyer_order_id', true ) ) ) {
 			$ledyer_order = ledyer()->api->get_order( $order->get_meta( '_wc_ledyer_order_id', true ) );
 
 			if ( is_wp_error( $ledyer_order ) && 404 === $ledyer_order->get_error_code() ) {
