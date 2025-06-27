@@ -96,6 +96,13 @@ class Callback {
 		}
 
 		$scheduleId = as_schedule_single_action( time() + 60, 'schedule_process_notification', array( $ledyer_order_id, $ledyer_event_type ) );
+
+		if ( 0 === $scheduleId ) {
+			Logger::log( "[CALLBACK]: Couldn't schedule process_notification for order: $ledyer_order_id and type: $ledyer_event_type" );
+			$response->set_status( 500 );
+			return $response;
+		}
+
 		Logger::log( "Enqueued notification: $ledyer_event_type, schedule-id: $scheduleId" );
 		$response->set_status( 200 );
 		return $response;
