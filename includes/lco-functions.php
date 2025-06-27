@@ -10,7 +10,7 @@
 /**
  * Gets a Ledyer order. Either creates or updates existing order.
  *
- * @return array
+ * @return array|false
  */
 function lco_create_or_update_order() {
 	// Need to calculate these here, because WooCommerce hasn't done it yet.
@@ -79,7 +79,7 @@ function lco_create_or_update_order() {
 		}
 		return $ledyer_order;
 	} else {
-		// Create new order, since we dont have one.
+		// Create new order, since we don't have one.
 		$data         = \Ledyer\Requests\Helpers\Woocommerce_Bridge::get_cart_data();
 		$ledyer_order = ledyer()->api->create_order_session( $data );
 
@@ -140,7 +140,7 @@ function lco_wc_get_selected_payment_method() {
 }
 
 /**
- * Unsets the sessions used by the plguin.
+ * Unsets the sessions used by the plugin.
  *
  * @return void
  */

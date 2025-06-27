@@ -14,7 +14,7 @@ namespace Ledyer;
  *
  * Registers AJAX actions for Ledyer Checkout for WooCommerce.
  *
- * @extends WC_AJAX
+ * @extends \WC_AJAX
  */
 class AJAX extends \WC_AJAX {
 
@@ -136,7 +136,7 @@ class AJAX extends \WC_AJAX {
 		$posted_message  = isset( $_POST['message'] ) ? sanitize_text_field( wp_unslash( $_POST['message'] ) ) : '';
 		$ledyer_order_id = WC()->session->get( 'lco_wc_order_id' );
 		$message         = "Frontend JS $ledyer_order_id: $posted_message";
-		Logger::log( $message );
+		Logger::log( "[AJAX]: $message" );
 		wp_send_json_success();
 		wp_die();
 	}
@@ -172,10 +172,9 @@ class AJAX extends \WC_AJAX {
 	/**
 	 * Sets hidden customer fields using info from Ledyer order.
 	 *
-	 * @return array
+	 * @return array|null
 	 */
 	public static function set_customer_data( $ledyer_order ) {
-
 		if ( WC()->checkout() && ! empty( WC()->checkout()->checkout_fields ) ) {
 			$fields = WC()->checkout()->checkout_fields;
 
