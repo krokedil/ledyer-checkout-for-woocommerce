@@ -40,17 +40,17 @@ class Confirmation {
 		$order_id = wc_get_order_id_by_order_key( $order_key );
 
 		if ( empty( $order_id ) ) {
-			\Ledyer\Logger::log( 'Could not get the WooCommerce order id from order key ' . $order_key );
+			\Ledyer\Logger::log( "Could not get the WooCommerce order id from order key $order_key" );
 			return;
 		}
 
 		$order = wc_get_order( $order_id );
 		if ( empty( $order ) ) {
-			\Ledyer\Logger::log( 'Could not get the WooCommerce order with the id ' . $order_id );
+			\Ledyer\Logger::log( "Could not get the WooCommerce order with the id $order_id" );
 			return;
 		}
 
-		Logger::log( $order_id . ': Confirm the Ledyer order from the confirmation page.' );
+		Logger::log( "{$order_id}: Confirm the Ledyer order from the confirmation page." );
 		wc_ledyer_confirm_ledyer_order( $order_id );
 		lco_unset_sessions();
 	}
