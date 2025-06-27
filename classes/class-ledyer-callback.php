@@ -144,9 +144,52 @@ class Callback {
 			return;
 		}
 
+		$ledyer_payment_method = $ledyer_payment_status['paymentMethod'];
+		if ( ! empty( $ledyer_payment_status['paymentMethod'] ) ) {
+			$ledyer_payment_provider = sanitize_text_field( $ledyer_payment_method['provider'] );
+			$ledyer_payment_type     = sanitize_text_field( $ledyer_payment_method['type'] );
+
+			$order->update_meta_data( 'ledyer_payment_type', $ledyer_payment_type );
+			$order->update_meta_data( 'ledyer_payment_method', $ledyer_payment_provider );
+
+			switch ( $ledyer_payment_type ) {
+				case 'invoice':
+					$method_title = __( 'Invoice', 'ledyer-checkout-for-woocommerce' );
+					break;
+				case 'advanceInvoice':
+					$method_title = __( 'Advance Invoice', 'ledyer-checkout-for-woocommerce' );
+					break;
+				case 'card':
+					$method_title = __( 'Card', 'ledyer-checkout-for-woocommerce' );
+					break;
+				case 'bankTransfer':
+					$method_title = __( 'Direct Debit', 'ledyer-checkout-for-woocommerce' );
+					break;
+				case 'partPayment':
+					$method_title = __( 'Part Payment', 'ledyer-checkout-for-woocommerce' );
+					break;
+			}
+
+			$order->set_payment_method_title( sprintf( '%s (Ledyer)', $method_title ) );
+			$order->save();
+		}
+
 		$ack_order = false;
 
 		switch ( $ledyer_payment_status['status'] ) {
+			case \LedyerPaymentStatus::ORDER_PENDING:
+				if ( ! $order->has_status( array( 'on-hold', 'processing', 'completed' ) ) ) {
+					$note = sprintf(
+						__(
+							'New session created in Ledyer with Payment ID %1$s. %2$s',
+							'ledyer-checkout-for-woocommerce'
+						),
+						$ledyer_order_id,
+						$ledyer_payment_status['note']
+					);
+					$order->update_status( 'on-hold', $note );
+				}
+				break;
 			case \LedyerPaymentStatus::PAYMENT_PENDING:
 				if ( ! $order->has_status( array( 'on-hold', 'processing', 'completed' ) ) ) {
 					$note = sprintf(

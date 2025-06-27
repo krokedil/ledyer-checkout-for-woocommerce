@@ -91,7 +91,6 @@ class Ledyer_Checkout_For_WooCommerce {
 
 		AJAX::init();
 		Templates::instance();
-		Confirmation::instance();
 		Checkout::instance();
 		Callback::instance();
 
@@ -135,7 +134,6 @@ class Ledyer_Checkout_For_WooCommerce {
 		include_once LCO_WC_PLUGIN_PATH . '/classes/class-ledyer-ajax.php';
 		include_once LCO_WC_PLUGIN_PATH . '/classes/class-ledyer-api.php';
 		include_once LCO_WC_PLUGIN_PATH . '/classes/class-ledyer-checkout.php';
-		include_once LCO_WC_PLUGIN_PATH . '/classes/class-ledyer-confirmation.php';
 		include_once LCO_WC_PLUGIN_PATH . '/classes/class-ledyer-credentials.php';
 		include_once LCO_WC_PLUGIN_PATH . '/classes/class-ledyer-fields.php';
 		include_once LCO_WC_PLUGIN_PATH . '/classes/class-ledyer-lco-gateway.php';
