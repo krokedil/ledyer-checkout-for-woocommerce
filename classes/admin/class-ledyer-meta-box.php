@@ -29,7 +29,7 @@ class Meta_Box {
 	/**
 	 * Adds meta box to the side of a LCO order.
 	 *
-	 * @param string $post_type The WordPress post type.
+	 * @param string $screen_id The WordPress admin screen ID.
 	 * @return void
 	 */
 	public function add_meta_boxes( $post_type ) {

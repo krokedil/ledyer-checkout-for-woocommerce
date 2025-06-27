@@ -20,6 +20,9 @@
     "build-assets": "npm ci && npm run build",
     "install-codestandards": [
       "Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\Plugin::run"
-    ]
+    ],
+    "phpcs": "php -d memory_limit=512M vendor/bin/phpcs --standard=phpcs.xml classes/**/*.php includes/*.php templates/*.php",
+    "phpcbf": "php -d memory_limit=512M vendor/bin/phpcbf --standard=phpcs.xml classes/**/*.php includes/*.php templates/*.php"
   }
 }
+

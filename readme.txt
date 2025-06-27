@@ -7,11 +7,14 @@ Tested up to: 6.6.2
 Requires PHP: 7.4
 WC requires at least: 5.6.0
 WC tested up to: 9.3.3
-Stable tag: 1.11.0
+Stable tag: 1.11.2
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
 == Changelog ==
+= 2025.03.27    - version 1.11.2 =
+* Chore         - Trigger a new release
+
 = 2025.03.10    - version 1.11.1 =
 * Fix           - Added fallbacks to ensure the locale sent from WooCommerce always follows the BCP47 standard, addressing inconsistencies caused by certain plugins.
 

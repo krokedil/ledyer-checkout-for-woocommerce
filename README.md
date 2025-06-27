@@ -26,10 +26,31 @@ If you are missing data i woocommerce, make sure you have set the following:
 - Make sure that the Woocommerce shop is configured to use Swedish krona. Woocommerce -> Settings -> General -> Currency -> Swedish krona (kr)
 - Make sure to enter a terms url in Ledyer checkout plugin settings.
 
-## Code formatting
+## Using Code Standards Tools
 
-We are following rules specified in phpcs.xml. For automatic formatting on save etc we recommend [phpcbf](https://phpqa.io/projects/phpcbf.html), when in installed you can run
-```shell
-vendor/bin/phpcbf --standard=phpcs.xml .
+The project includes two composer scripts for code standards:
+
+1. **Check code standards**:
+
+   ```bash
+   composer phpcs
+   ```
+
+   This will scan your code and report any coding standards violations.
+
+2. **Fix code standards automatically**:
+
+   ```bash
+   composer phpcbf
+   ```
+
+   This will automatically fix coding standards issues that can be fixed automatically.
+
+You can also target specific files or directories:
+
+```bash
+composer phpcs -- src/specific-directory
+composer phpcbf -- src/specific-file.php
 ```
-To format the whole codebase, or you may wanna find a plugin for you specific development environment.
+
+Note that not all issues can be fixed automatically with phpcbf. After running it, you should run phpcs again to check for any remaining issues that need manual fixing.
