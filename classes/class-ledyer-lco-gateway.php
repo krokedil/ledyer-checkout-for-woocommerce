@@ -124,11 +124,15 @@ if ( class_exists( 'WC_Payment_Gateway' ) ) {
 			}
 
 			// Load the Ledyer Checkout for WooCommerce stylesheet.
+			$url  = plugins_url( 'build/ledyer-checkout-for-woocommerce.css', LCO_WC_MAIN_FILE );
+			$path = plugin_dir_path( LCO_WC_MAIN_FILE ) . 'build/ledyer-checkout-for-woocommerce.css';
+			$ver  = file_exists( $path ) ? filemtime( $path ) : LCO_WC_VERSION;
+
 			wp_register_style(
 				'lco',
-				plugins_url( 'build/ledyer-checkout-for-woocommerce.css', LCO_WC_MAIN_FILE ),
+				$url,
 				array(),
-				filemtime( plugin_dir_path( LCO_WC_MAIN_FILE ) . ( 'build/ledyer-checkout-for-woocommerce.css' ) )
+				$ver
 			);
 			wp_enqueue_style( 'lco' );
 
