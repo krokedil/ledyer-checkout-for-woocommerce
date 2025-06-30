@@ -122,13 +122,19 @@ class Callback {
 			),
 		);
 
-		$order_id = isset( $orders[0] ) ? $orders[0]->get_id() : null;
+		$order_id = isset( $orders[0] ) ? $orders[0]->get_id() : false;
 		$order    = wc_get_order( $order_id );
 
 		Logger::log( "Order to process: $order_id" );
 
 		if ( ! is_object( $order ) ) {
 			Logger::log( "Could not find woo order with ledyer id: $ledyer_order_id" );
+			return;
+		}
+
+		$wc_order_ledyer_order_id = $order->get_meta( '_wc_ledyer_order_id' );
+		if ( $ledyer_order_id !== $wc_order_ledyer_order_id ) {
+			Logger::log( "[SCHEDULER]: Order {$order->get_order_number()} has Ledyer order ID $wc_order_ledyer_order_id. Expected $ledyer_order_id" );
 			return;
 		}
 
