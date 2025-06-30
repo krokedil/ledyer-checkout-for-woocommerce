@@ -77,7 +77,7 @@ class Callback {
 	 * @return \WP_REST_Response
 	 */
 	public function handle_notification( \WP_REST_Request $request ) {
-		$request_body = json_decode( $request->get_body() );
+		$request_body = $request->get_json_params();
 		$response     = new \WP_REST_Response();
 
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
@@ -86,8 +86,8 @@ class Callback {
 			return $response;
 		}
 
-		$ledyer_event_type = $request_body->{'eventType'};
-		$ledyer_order_id   = $request_body->{'orderId'};
+		$ledyer_event_type = $request_body['eventType'];
+		$ledyer_order_id   = $request_body['orderId'];
 
 		if ( ! isset( $ledyer_event_type, $ledyer_order_id ) ) {
 			Logger::log( "Request body doesn't hold orderId and eventType data." );
