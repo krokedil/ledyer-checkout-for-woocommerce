@@ -451,17 +451,23 @@ class Cart {
 	 * @access public
 	 */
 	public function get_item_tax_rate( $cart_item, $product ) {
+		$item_tax_rate = 0;
 		if ( $product->is_taxable() && $cart_item['line_subtotal_tax'] > 0 ) {
-			// Calculate tax rate.
-			$_tax          = new WC_Tax();
-			$tmp_rates     = $_tax->get_rates( $product->get_tax_class() );
-			$vat           = array_shift( $tmp_rates );
-			$item_tax_rate = isset( $vat['rate'] ) ? round( $vat['rate'] * 100 ) : 0;
-		} else {
-			$item_tax_rate = 0;
+			$tax       = new WC_Tax();
+			$tax_rates = $tax->get_rates( $product->get_tax_class() );
+			if ( empty( $tax_rates ) ) {
+				$item_tax_rate = 0.0 === floatval( $cart_item['line_total'] ) ? 0 : round( $cart_item['line_tax'] / $cart_item['line_total'] * 10000 );
+			} else {
+				$item_tax_rate = array_map(
+					function ( $i ) {
+						return round( ( $i['rate'] ?? 0 ) * 100 );
+					},
+					$tax_rates
+				);
+			}
 		}
 
-		return round( $item_tax_rate );
+		return $item_tax_rate;
 	}
 
 
