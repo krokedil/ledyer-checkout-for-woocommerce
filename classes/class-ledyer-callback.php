@@ -80,7 +80,7 @@ class Callback {
 		$request_body = $request->get_json_params();
 		$response     = new \WP_REST_Response();
 
-		if ( json_last_error() !== JSON_ERROR_NONE ) {
+		if ( empty( $request_body ) ) {
 			Logger::log( "Request body isn't valid JSON string." );
 			$response->set_status( 400 );
 			return $response;
@@ -95,8 +95,8 @@ class Callback {
 			return $response;
 		}
 
-		$scheduleId = as_schedule_single_action( time() + 120, 'schedule_process_notification', array( $ledyer_order_id, $ledyer_event_type ) );
-		Logger::log( "Enqueued notification: $ledyer_event_type, schedule-id: $scheduleId" );
+		$schedule_id = as_schedule_single_action( time() + 120, 'schedule_process_notification', array( $ledyer_order_id, $ledyer_event_type ) );
+		Logger::log( "Enqueued notification: $ledyer_event_type, schedule-id: $schedule_id" );
 		$response->set_status( 200 );
 		return $response;
 	}
