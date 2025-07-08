@@ -95,7 +95,7 @@ class Callback {
 			return $response;
 		}
 
-		$schedule_id = as_schedule_single_action( time() + 120, 'schedule_process_notification', array( $ledyer_order_id, $ledyer_event_type ) );
+		$schedule_id = as_schedule_single_action( time() + 60, 'schedule_process_notification', array( $ledyer_order_id, $ledyer_event_type ) );
 		Logger::log( "Enqueued notification: $ledyer_event_type, schedule-id: $schedule_id" );
 		$response->set_status( 200 );
 		return $response;
