@@ -19,6 +19,41 @@ defined( 'ABSPATH' ) || exit();
 class Cart {
 
 	/**
+	 * Total amount.
+	 *
+	 * @var int
+	 */
+	public $total_amount;
+
+	/**
+	 * Subtotal amount.
+	 *
+	 * @var int
+	 */
+	public $subtotal_amount;
+
+	/**
+	 * Total tax amount.
+	 *
+	 * @var int
+	 */
+	public $total_tax_amount;
+
+	/**
+	 * Subtotal tax amount.
+	 *
+	 * @var int
+	 */
+	public $subtotal_tax_amount;
+
+	/**
+	 * Quantity.
+	 *
+	 * @var int
+	 */
+	public $quantity;
+
+	/**
 	 * Formatted order lines.
 	 *
 	 * @var array $order_lines
@@ -145,11 +180,7 @@ class Cart {
 	public function process_cart() {
 		foreach ( WC()->cart->get_cart() as $cart_item ) {
 			if ( $cart_item['quantity'] ) {
-				if ( $cart_item['variation_id'] ) {
-					$product = wc_get_product( $cart_item['variation_id'] );
-				} else {
-					$product = wc_get_product( $cart_item['product_id'] );
-				}
+				$product = wc_get_product( $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'] );
 
 				$this->total_amount        = self::format_number( $cart_item['line_total'] );
 				$this->subtotal_amount     = self::format_number( $cart_item['line_subtotal'] );
@@ -394,17 +425,17 @@ class Cart {
 	/**
 	 * Calculate item tax percentage.
 	 *
-	 * @param array      $cart_item Cart item.
-	 * @param WC_Product $product WooCommerce product.
+	 * @param array       $cart_item Cart item.
+	 * @param \WC_Product $product WooCommerce product.
 	 *
 	 * @return integer $item_tax_amount Item tax amount.
 	 * @since  1.0.0
 	 * @access public
 	 */
 	public function get_item_tax_amount( $cart_item, $product ) {
-		$item_total_amount       = $this->get_item_total_amount( $cart_item, $product );
-		$item_total_exluding_tax = $item_total_amount / ( 1 + ( $this->get_item_tax_rate( $cart_item, $product ) / 10000 ) );
-		$item_tax_amount         = $item_total_amount - $item_total_exluding_tax;
+		$item_total_amount        = $this->get_item_total_amount( $cart_item, $product );
+		$item_total_excluding_tax = $item_total_amount / ( 1 + ( $this->get_item_tax_rate( $cart_item, $product ) / 10000 ) );
+		$item_tax_amount          = $item_total_amount - $item_total_excluding_tax;
 
 		return round( $item_tax_amount );
 	}
@@ -420,21 +451,25 @@ class Cart {
 	 * @access public
 	 */
 	public function get_item_tax_rate( $cart_item, $product ) {
+		$item_tax_rate = 0;
 		if ( $product->is_taxable() && $cart_item['line_subtotal_tax'] > 0 ) {
-			// Calculate tax rate.
-			$_tax      = new WC_Tax();
-			$tmp_rates = $_tax->get_rates( $product->get_tax_class() );
-			$vat       = array_shift( $tmp_rates );
-			if ( isset( $vat['rate'] ) ) {
-				$item_tax_rate = round( $vat['rate'] * 100 );
+			$tax       = new WC_Tax();
+			$tax_rates = $tax->get_rates( $product->get_tax_class() );
+			if ( empty( $tax_rates ) ) {
+				$item_tax_rate = 0.0 === floatval( $cart_item['line_total'] ) ? 0 : round( $cart_item['line_tax'] / $cart_item['line_total'] * 10000 );
 			} else {
-				$item_tax_rate = 0;
+				$item_tax_rate = array_map(
+					function ( $i ) {
+						return round( ( $i['rate'] ?? 0 ) * 100 );
+					},
+					$tax_rates
+				);
+
+				$item_tax_rate = array_shift( $item_tax_rate );
 			}
-		} else {
-			$item_tax_rate = 0;
 		}
 
-		return round( $item_tax_rate );
+		return $item_tax_rate;
 	}
 
 
@@ -490,8 +525,8 @@ class Cart {
 	/**
 	 * Get cart item total amount.
 	 *
-	 * @param array      $cart_item Cart item.
-	 * @param WC_Product $product WooCommerce product.
+	 * @param array       $cart_item Cart item.
+	 * @param \WC_Product $product WooCommerce product.
 	 *
 	 * @return integer $item_total_amount Cart item total amount.
 	 * @since  1.0.0
@@ -579,18 +614,17 @@ class Cart {
 	 * @access public
 	 */
 	public function get_shipping_tax_rate() {
-
-		if ( WC()->cart->shipping_tax_total > 0 ) {
-			$shipping_rates = WC_Tax::get_shipping_tax_rates();
-			$vat            = array_shift( $shipping_rates );
-			if ( isset( $vat['rate'] ) ) {
-				$shipping_tax_rate = round( $vat['rate'] * 100 );
-			} else {
-				$shipping_tax_rate = 0;
-			}
-		} else {
-			$shipping_tax_rate = 0;
+		if ( WC()->cart->shipping_tax_total <= 0 ) {
+			return 0;
 		}
+
+		$shipping_rates = WC_Tax::get_shipping_tax_rates();
+		if ( ! is_array( $shipping_rates ) ) {
+			return 0;
+		}
+
+		$vat               = array_shift( $shipping_rates );
+		$shipping_tax_rate = isset( $vat['rate'] ) ? round( $vat['rate'] * 100 ) : 0;
 
 		return intval( round( $shipping_tax_rate ) );
 	}
@@ -603,17 +637,13 @@ class Cart {
 	 * @access public
 	 */
 	public function get_shipping_tax_amount() {
-		$shiping_total_amount        = $this->get_shipping_amount();
-		$shipping_total_exluding_tax = $shiping_total_amount / ( 1 + ( $this->get_shipping_tax_rate() / 10000 ) );
-		$shipping_tax_amount         = $shiping_total_amount - $shipping_total_exluding_tax;
-
-		return intval( round( $shipping_tax_amount ) );
+		return self::format_number( WC()->cart->get_shipping_tax() );
 	}
 
 	/**
 	 * Format the value as needed for the Ledyer plugin.
 	 *
-	 * @param int|float $value The unformated value.
+	 * @param int|float $value The unformatted value.
 	 *
 	 * @return int
 	 */
