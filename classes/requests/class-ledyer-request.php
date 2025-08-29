@@ -54,6 +54,14 @@ abstract class Request {
 	 * @var string
 	 */
 	protected $request_url;
+
+	/**
+	 * Log title
+	 *
+	 * @var string
+	 */
+	protected $log_title = 'Debugger';
+
 	/**
 	 * Requests Class constructor.
 	 *
@@ -145,6 +153,17 @@ abstract class Request {
 	}
 
 	/**
+	 * Set log title
+	 *
+	 * @param string $title Log title.
+	 * @return $this
+	 */
+	public function set_title( $title ) {
+		$this->log_title = $title;
+		return $this;
+	}
+
+	/**
 	 * Create request url.
 	 *
 	 * @return string
@@ -209,7 +228,7 @@ abstract class Request {
 	protected function process_response( $response, $request_args, $request_url ) {
 		$code = wp_remote_retrieve_response_code( $response );
 
-		$log = Logger::format_log( '', 'POST', 'Debugger', $request_args, json_decode( wp_remote_retrieve_body( $response ), true ), $code );
+		$log = Logger::format_log( '', 'POST', $this->log_title, $request_args, json_decode( wp_remote_retrieve_body( $response ), true ), $code );
 
 		Logger::log( $log );
 

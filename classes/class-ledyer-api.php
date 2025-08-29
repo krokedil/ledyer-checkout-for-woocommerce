@@ -27,7 +27,7 @@ class API {
 	 * @return mixed|\WP_Error The order session data or WP_Error on failure.
 	 */
 	public function get_order_session( $order_id ) {
-		return ( new Get_Order( array( 'orderId' => $order_id ) ) )->request();
+		return ( new Get_Order( array( 'orderId' => $order_id ) ) )->set_title( 'Get order session' )->request();
 	}
 	/**
 	 * Creates an order session in Ledyer.
@@ -37,7 +37,7 @@ class API {
 	 * @return mixed|\WP_Error The created order session data or WP_Error on failure.
 	 */
 	public function create_order_session( $data ) {
-		return ( new Create_Order( compact( 'data' ) ) )->request();
+		return ( new Create_Order( compact( 'data' ) ) )->set_title( 'Create order session' )->request();
 	}
 	/**
 	 * Updates an order session in Ledyer.
@@ -52,7 +52,7 @@ class API {
 				'orderId' => $order_id,
 				'data'    => $data,
 			)
-		) )->request();
+		) )->set_title( 'Update order session' )->request();
 	}
 	/**
 	 * Gets an order from Ledyer.
@@ -61,7 +61,7 @@ class API {
 	 * @return mixed|\WP_Error The order data or WP_Error on failure.
 	 */
 	public function get_order( $order_id ) {
-		return ( new \Ledyer\Requests\Order\Management\Get_Order( array( 'orderId' => $order_id ) ) )->request();
+		return ( new \Ledyer\Requests\Order\Management\Get_Order( array( 'orderId' => $order_id ) ) )->set_title( 'Get order' )->request();
 	}
 	/**
 	 * Updates an order reference in Ledyer.
@@ -76,7 +76,7 @@ class API {
 				'orderId' => $order_id,
 				'data'    => $data,
 			)
-		) )->request();
+		) )->set_title( 'Update order reference' )->request();
 	}
 	/**
 	 * Acknowledges an order in Ledyer.
@@ -90,7 +90,7 @@ class API {
 				'orderId' => $order_id,
 				'data'    => array(),
 			)
-		) )->request();
+		) )->set_title( 'Acknowledge order' )->request();
 	}
 	/**
 	 * Get payment status for an order.
