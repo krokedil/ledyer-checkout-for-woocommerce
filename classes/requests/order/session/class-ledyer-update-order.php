@@ -28,4 +28,20 @@ class Update_Order extends Request_Order {
 
 		parent::get_request_url();
 	}
+
+	/**
+	 * Create request args.
+	 *
+	 * @return array
+	 */
+	protected function get_request_args() {
+		$request_args = parent::get_request_args();
+
+		// Remove the settings.urls from the body to avoid 400 error.
+		$body = json_decode( $request_args['body'], true );
+		unset( $body['settings']['urls'] );
+		$request_args['body'] = wp_json_encode( $body );
+
+		return $request_args;
+	}
 }
