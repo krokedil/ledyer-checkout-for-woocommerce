@@ -37,10 +37,15 @@ class Update_Order extends Request_Order {
 	protected function get_request_args() {
 		$request_args = parent::get_request_args();
 
-		// Remove the settings.urls from the body to avoid 400 error.
 		$body = json_decode( $request_args['body'], true );
-		unset( $body['settings']['urls'] );
-		$request_args['body'] = wp_json_encode( $body );
+		if ( ! empty( $body ) ) {
+			// Remove the settings.urls from the body to avoid 400 error.
+			if ( isset( $body['settings']['urls'] ) ) {
+				unset( $body['settings']['urls'] );
+			}
+
+			$request_args['body'] = wp_json_encode( $body );
+		}
 
 		return $request_args;
 	}
