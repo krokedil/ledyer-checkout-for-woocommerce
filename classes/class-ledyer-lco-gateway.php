@@ -64,7 +64,8 @@ if ( class_exists( 'WC_Payment_Gateway' ) ) {
 			\add_filter( 'script_loader_tag', array( $this, 'add_data_attributes' ), 10, 2 );
 
 			\add_action( 'woocommerce_checkout_order_processed', array( $this, 'wc_order_created' ), 10, 3 );
-			\add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'show_thank_you_snippet' ) );
+			\add_action( "woocommerce_thankyou_{$this->id}", array( $this, 'update_status_on_thankyou' ) );
+			\add_action( "woocommerce_thankyou_{$this->id}", array( $this, 'show_thank_you_snippet' ) );
 			\add_action( 'woocommerce_thankyou', 'lco_unset_sessions', 100, 1 );
 
 			\add_action( 'woocommerce_admin_order_data_after_billing_address', array( $this, 'ledyer_order_billing_fields' ), 10, 1 );
@@ -431,6 +432,30 @@ if ( class_exists( 'WC_Payment_Gateway' ) ) {
 		 */
 		public function process_refund( $order_id, $amount = null, $reason = '' ) {
 			return apply_filters( 'wc_ledyer_checkout_process_refund', false, $order_id, $amount, $reason );
+		}
+
+		/**
+		 * Update order status to "on-hold" on thank you page if not already paid.
+		 *
+		 * @param int $order_id WooCommerce order ID.
+		 */
+		public function update_status_on_thankyou( $order_id ) {
+			$order = wc_get_order( $order_id );
+			if ( empty( $order ) ) {
+				return;
+			}
+
+			$order_key = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+			if ( empty( $order_key ) || ! hash_equals( $order->get_order_key(), $order_key ) ) {
+				return;
+			}
+
+			if ( ! empty( $order->get_date_paid() ) || 'on-hold' === $order->get_status() ) {
+				return;
+			}
+
+			$order->update_status( 'on-hold', __( 'Awaiting payment confirmation from Ledyer.', 'ledyer-checkout-for-woocommerce' ) );
+			$order->save();
 		}
 
 		/**
