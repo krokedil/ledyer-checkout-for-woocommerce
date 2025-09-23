@@ -226,17 +226,15 @@ abstract class Request {
 	 * @return mixed|\WP_Error
 	 */
 	protected function process_response( $response, $request_args, $request_url ) {
-		$code = wp_remote_retrieve_response_code( $response );
+		$response_code = wp_remote_retrieve_response_code( $response );
 
-		$log = Logger::format_log( '', 'POST', $this->log_title, $request_args, json_decode( wp_remote_retrieve_body( $response ), true ), $code );
-
+		$body = is_wp_error( $response ) ? $response->get_error_message() : json_decode( wp_remote_retrieve_body( $response ), true );
+		$log  = Logger::format_log( '', 'POST', $this->log_title, $request_args, $body, $response_code );
 		Logger::log( $log );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
-
-		$response_code = wp_remote_retrieve_response_code( $response );
 
 		if ( $response_code < 200 || $response_code > 299 ) {
 			$data          = 'URL: ' . $request_url . ' - ' . wp_json_encode( $request_args );
