@@ -35,7 +35,9 @@ class Logger {
 				self::$log = new \WC_Logger();
 			}
 			$context = array( 'source' => 'ledyer-log' );
-			self::$log->log( 'debug', stripcslashes( wp_json_encode( $message ) ), $context );
+			$code    = $data['response']['code'] ?? 200;
+			$level   = $code < 200 || $code > 299 ? 'error' : 'debug';
+			self::$log->log( $level, stripcslashes( wp_json_encode( $message ) ), $context );
 		}
 	}
 
@@ -72,8 +74,8 @@ class Logger {
 			unset( $response['snippet'] );
 		}
 		// Unset the snippet to prevent issues in the request body.
-		if ( isset( $request_args['body'] ) ) {
-			$request_body = json_decode( $request_args['body'], true );
+		if ( isset( $request_args['snippet'] ) ) {
+			unset( $request_args['snippet'] );
 		}
 
 		return array(
@@ -82,7 +84,7 @@ class Logger {
 			'title'          => $title,
 			'request'        => $request_args,
 			'response'       => array(
-				'body' => $request_body ?? $response,
+				'body' => $response,
 				'code' => $code,
 			),
 			'timestamp'      => gmdate( 'Y-m-d H:i:s' ),
