@@ -74,8 +74,8 @@ class Logger {
 			unset( $response['snippet'] );
 		}
 		// Unset the snippet to prevent issues in the request body.
-		if ( isset( $response['body'] ) ) {
-			$response = json_decode( $request_args['body'], true );
+		if ( isset( $request_args['snippet'] ) ) {
+			unset( $request_args['snippet'] );
 		}
 
 		return array(
