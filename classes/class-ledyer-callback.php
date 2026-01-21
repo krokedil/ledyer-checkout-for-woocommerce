@@ -53,6 +53,7 @@ class Callback {
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 		add_action( 'schedule_process_notification', array( $this, 'process_notification' ), 10, 2 );
+		add_action( 'init', array( $this, 'schedule_events_redirect' ) );
 	}
 
 	/**
@@ -70,6 +71,66 @@ class Callback {
 				'permission_callback' => '__return_true',
 			)
 		);
+	}
+
+	/**
+	 * Schedule events for the redirect flow.
+	 *
+	 * @return void
+	 */
+	public function schedule_events_redirect() {
+		$ledyer_confirm = filter_input( INPUT_GET, 'lco_confirm', FILTER_SANITIZE_URL );
+		$order_key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+
+		if ( empty( $ledyer_confirm ) || empty( $order_key ) ) {
+			return;
+		}
+
+		$settings = get_option( 'woocommerce_lco_settings', array() );
+		if ( 'redirect' !== ( $settings['checkout_flow'] ?? 'embedded' ) ) {
+			return;
+		}
+
+		$order_id = wc_get_order_id_by_order_key( $order_key );
+		if ( empty( $order_id ) ) {
+			return;
+		}
+
+		$order = wc_get_order( $order_id );
+		if ( empty( $order ) ) {
+			return;
+		}
+
+		// If the order is already completed, return.
+		if ( ! empty( $order->get_date_paid() ) ) {
+			return;
+		}
+
+		// Only schedule events once per order.
+		$redirect_events_scheduled = $order->get_meta( '_ledyer_redirect_events_scheduled', true );
+		if ( ! empty( $redirect_events_scheduled ) ) {
+			return;
+		}
+
+		$ledyer_order_id = $order->get_meta( '_wc_ledyer_order_id' );
+
+		if ( empty( $ledyer_order_id ) ) {
+			return;
+		}
+
+		$ledyer_events = array( 'com.ledyer.order.create', 'com.ledyer.order.ready_for_capture' );
+		foreach ( $ledyer_events as $ledyer_event_type ) {
+			$schedule_id = as_schedule_single_action( time() + 60, 'schedule_process_notification', array( $ledyer_order_id, $ledyer_event_type ) );
+
+			if ( 0 === $schedule_id ) {
+				Logger::log( "[CALLBACK][REDIRECT FLOW]: Couldn't schedule process_notification for order: $ledyer_order_id and type: $ledyer_event_type" );
+				return;
+			}
+
+			Logger::log( "[CALLBACK][REDIRECT FLOW]: Enqueued notification: $ledyer_event_type, schedule-id: $schedule_id" );
+		}
+		$order->update_meta_data( '_ledyer_redirect_events_scheduled', true );
+		$order->save();
 	}
 
 	/**
@@ -188,15 +249,15 @@ class Callback {
 			$order->save();
 		}
 
-	    Confirmation::process_order_status( $ledyer_payment_status, $order, $ledyer_order_id );
+		Confirmation::process_order_status( $ledyer_payment_status, $order, $ledyer_order_id );
 	}
 
 	/**
 	 * Process the ready for capture event.
-	*
-	 * @param array $ledyer_payment_status The Ledyer payment status response.
+	 *
+	 * @param array     $ledyer_payment_status The Ledyer payment status response.
 	 * @param \WC_Order $order The WooCommerce order object.
-	 * @param string $ledyer_order_id The Ledyer order ID.
+	 * @param string    $ledyer_order_id The Ledyer order ID.
 	 *
 	 * @return void
 	 */
