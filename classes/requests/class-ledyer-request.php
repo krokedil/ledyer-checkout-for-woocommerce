@@ -53,6 +53,14 @@ abstract class Request {
 	 * @var string
 	 */
 	protected $request_url;
+
+	/**
+	 * Log title
+	 *
+	 * @var string
+	 */
+	protected $log_title = 'Debugger';
+
 	/**
 	 * The log title to use for the debug log.
 	 *
@@ -148,6 +156,17 @@ abstract class Request {
 		$response = wp_remote_request( $url, $args );
 
 		return $this->process_response( $response, $args, $url );
+	}
+
+	/**
+	 * Set log title
+	 *
+	 * @param string $title Log title.
+	 * @return $this
+	 */
+	public function set_title( $title ) {
+		$this->log_title = $title;
+		return $this;
 	}
 
 	/**
