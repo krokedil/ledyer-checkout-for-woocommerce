@@ -77,6 +77,9 @@ if ( class_exists( 'WC_Payment_Gateway' ) ) {
 
 			// Invalidate token cache when settings are updated
 			\add_action( 'woocommerce_update_options', array( $this, 'on_ledyer_settings_save' ), 1 );
+
+			// Prevent the WC validation from proceeding if there is a discrepancy between WC and Ledyer.
+			add_action( 'woocommerce_after_checkout_validation', array( $this, 'validate_checkout' ), 10, 2 );
 		}
 
 		public function on_ledyer_settings_save() {
@@ -248,6 +251,51 @@ if ( class_exists( 'WC_Payment_Gateway' ) ) {
 			}
 
 			wp_enqueue_script( 'lco' );
+		}
+
+			/**
+			 * Validate the data of the checkout fields matches the Ledyer order.
+			 *
+			 * @param array    $data An array of posted data.
+			 * @param WP_Error $errors Validation errors.
+			 * @return void
+			 */
+		public function validate_checkout( $data, $errors ) {
+			if ( WC()->session->get( 'chosen_payment_method' ) !== $this->id ) {
+				return;
+			}
+
+			$ledyer_order_id = WC()->session->get( 'lco_wc_order_id' );
+			if ( empty( $ledyer_order_id ) ) {
+				Logger::log( '[CHECKOUT VALIDATION]: Ledyer order ID is not set in the session. Will not proceed with order.' );
+				$errors->add( 'ledyer_order_id', __( 'The Ledyer order id could not be retrieved from the session. Please try again.', 'ledyer-checkout-for-woocommerce' ) );
+				return;
+			}
+
+			$ledyer_order = ledyer()->api->get_order_session( $ledyer_order_id );
+			if ( is_wp_error( $ledyer_order ) ) {
+				Logger::log( "[CHECKOUT VALIDATION]: Error getting Ledyer order: {$ledyer_order->get_error_message()}. For Ledyer order ID: '$ledyer_order_id'. Will not proceed with order." );
+				$errors->add( 'ledyer_order', __( 'The Ledyer order could not be retrieved from the session. Please try again.', 'ledyer-checkout-for-woocommerce' ) );
+				return;
+			}
+
+			$ledyer_items = $ledyer_order['order'];
+			$cart_items   = \Ledyer\Requests\Helpers\Woocommerce_Bridge::get_updated_cart_data();
+
+			if ( $ledyer_items['totalOrderAmount'] != $cart_items['totalOrderAmount'] ) {
+				$errors->add( 'ledyer_order_amount_mismatch', __( 'The order total does not match the Ledyer order. Please refresh the page and try again.', 'ledyer-checkout-for-woocommerce' ) );
+				return;
+			}
+
+			if ( $ledyer_items['totalOrderAmountExclVat'] != $cart_items['totalOrderAmountExclVat'] ) {
+				$errors->add( 'ledyer_order_amount_excl_vat_mismatch', __( 'The order total excl. VAT does not match the Ledyer order. Please refresh the page and try again.', 'ledyer-checkout-for-woocommerce' ) );
+				return;
+			}
+
+			if ( $ledyer_items['totalOrderVatAmount'] != $cart_items['totalOrderVatAmount'] ) {
+				$errors->add( 'ledyer_order_vat_amount_mismatch', __( 'The order VAT amount does not match the Ledyer order. Please refresh the page and try again.', 'ledyer-checkout-for-woocommerce' ) );
+				return;
+			}
 		}
 
 		/**
